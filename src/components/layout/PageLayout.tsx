@@ -40,15 +40,28 @@ export default function PageLayout({
     const handleResize = () => {
       setButtonSize(window.innerWidth < 640 ? "lg" : "xl");
     };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") navigate(backPath);
+    };
+
     handleResize();
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [navigate, backPath]);
 
   return (
     <div className="flex h-dvh w-full flex-col p-2 gap-2 overflow-hidden">
       <SEO title={`${title} | INFERNOGUESSR GALLERY`} />
-      <header className="relative w-full shrink-0 bg-black/40 py-3 text-center text-base md:text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]">
+      <header
+        className="relative w-full shrink-0 bg-black/40 py-3 text-center text-base 
+        md:text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]"
+      >
         <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
           <Button
             variant="ghost"
