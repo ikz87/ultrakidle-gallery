@@ -74,7 +74,7 @@ export default function Home() {
       </div>
 
       {/* Scrollable Content Layer */}
-      <div className="flex-1 overflow-y-auto flex flex-col">
+      <div className="flex-1 overflow-y-auto flex flex-col ">
         <div className="mx-auto w-full max-w-[630px] flex flex-col pt-10 sm:pt-20 px-8 flex-shrink-0">
           <h1 className="text-2xl sm:text-4xl mx-auto pt-3">
             -- INFERNOGUESSR --
@@ -82,7 +82,7 @@ export default function Home() {
           <h2 className="text-xl sm:text-3xl mx-auto pt-3">-- GALLERY --</h2>
         </div>
 
-        <div className="flex-1 flex items-center justify-center w-full py-10 sm:py-20">
+        <div className="flex-1 flex items-center justify-center w-full py-6 sm:py-16 mb-8 ">
           <motion.div
             className="mx-auto w-full max-w-[630px] flex flex-col px-8"
             initial="hidden"
@@ -122,7 +122,7 @@ export default function Home() {
               variants={itemVariants}
               className="w-full h-0.5 bg-white mb-3"
             />
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 ">
               {SECTIONS.secondary.map((item) => (
                 <motion.div key={item.path} variants={itemVariants}>
                   <Link to={item.path}>
