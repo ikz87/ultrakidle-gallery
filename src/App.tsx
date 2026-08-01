@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import "@/App.css";
 import Home from "@/pages/Home";
 import Prelude from "@/pages/Prelude";
@@ -36,6 +36,7 @@ export default function App() {
           <Route path="/encores" element={<Encores />} />
           <Route path="/prime-sanctums" element={<PrimeSanctums />} />
           <Route path="/:layerPath/:levelName/:imgId?" element={<LevelGallery />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
     </div>

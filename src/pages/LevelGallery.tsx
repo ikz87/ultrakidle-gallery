@@ -194,7 +194,7 @@ export default function LevelGallery() {
                 <div className="w-full px-5 mt-auto mb-auto flex justify-center">
                   <div className="w-full aspect-video bg-zinc-900 overflow-hidden">
                     <img
-                      src={`https://gallery.ultrakidle.online/${sub.storage_path}`}
+                      src={`https://images.ultrakidle.online/${sub.storage_path}`}
                       className="w-full h-full object-contain"
                       loading="lazy"
                     />
@@ -237,10 +237,10 @@ export default function LevelGallery() {
         showFooterButton={false}
       >
         <div className="flex flex-col md:flex-row min-h-0 h-full w-full">
-          <div className="flex-[2] bg-black flex items-center justify-center border-b-2 md:border-b-0 md:border-r-2 border-white">
+          <div className="flex-[2] bg-black flex items-center justify-center  md:border-b-0 md:border-r-2 border-white">
             {submissions.find((s) => s.id.toString() === imgId) && (
               <img
-                src={`https://gallery.ultrakidle.online/${
+                src={`https://images.ultrakidle.online/${
                   submissions.find((s) => s.id.toString() === imgId)
                     ?.storage_path
                 }`}
@@ -274,25 +274,25 @@ export default function LevelGallery() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4 border-y-2 border-white py-4">
+                <div className="grid grid-cols-2 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
                   <div className="text-center">
-                    <p className="text-sm text-white uppercase mb-1">Times Picked</p>
-                    <p className="text-2xl ">{selectedSubData.times_picked}</p>
+                    <p className="text-sm text-white uppercase md:mb-1">Times Picked</p>
+                    <p className="text-lg md:text-2xl ">{selectedSubData.times_picked}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-white uppercase mb-1">Total Guesses</p>
-                    <p className="text-2xl ">
+                    <p className="text-sm text-white uppercase md:mb-1">Total Guesses</p>
+                    <p className="text-lg md:text-2xl ">
                       {selectedSubData.guesses?.reduce((acc, g) => acc + Number(g.amount), 0) ||
                         0}
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-white uppercase mb-1">Avg Score</p>
-                    <p className="text-2xl ">{Math.round(selectedSubData.avg_score)}</p>
+                    <p className="text-sm text-white uppercase md:mb-1">Avg Score</p>
+                    <p className="text-lg md:text-2xl ">{Math.round(selectedSubData.avg_score)}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-white uppercase mb-1">Avg Time</p>
-                    <p className="text-2xl ">
+                    <p className="text-sm text-white uppercase md:mb-1">Avg Time</p>
+                    <p className="text-lg md:text-2xl ">
                       {Number(selectedSubData.avg_time).toFixed(2)}s
                     </p>
                   </div>

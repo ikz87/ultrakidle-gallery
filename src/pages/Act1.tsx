@@ -61,7 +61,8 @@ export default function Act1() {
         <LevelGrid
           title="Layer 3: Gluttony"
           levels={layer3.layerLevels}
-          maxItemsPerRow={4}
+          maxItemsPerRow={2}
+          maxImgPerRow={4}
           layerPath="act-1"
           counts={counts}
           secretLevel={layer3.secretLevel}

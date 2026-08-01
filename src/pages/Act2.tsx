@@ -57,6 +57,7 @@ export default function Act2() {
         title="Layer 6: Heresy"
         levels={layer6.layerLevels}
         maxItemsPerRow={4}
+        maxImgPerRow={4}
         layerPath="act-2"
         counts={counts}
         secretLevel={layer6.secretLevel}

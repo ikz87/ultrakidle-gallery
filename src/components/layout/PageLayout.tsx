@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import SEO from "@/components/SEO";
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "@/components/ui/Button";
 
@@ -34,25 +34,33 @@ export default function PageLayout({
   backPath = "/",
 }: PageLayoutProps) {
   const navigate = useNavigate();
+  const [buttonSize, setButtonSize] = useState<"lg" | "xl">("xl");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setButtonSize(window.innerWidth < 640 ? "lg" : "xl");
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="flex h-dvh w-full flex-col p-2 gap-2 overflow-hidden">
       <SEO title={`${title} | INFERNOGUESSR GALLERY`} />
-            <header className="relative w-full shrink-0 bg-black/40 py-3 text-center text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]">
-        <div className="absolute left-4 top-1/2 -translate-y-1/2">
+      <header className="relative w-full shrink-0 bg-black/40 py-3 text-center text-base md:text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]">
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
           <Button
             variant="ghost"
-            size="lg"
+            size={buttonSize}
             onClick={() => navigate(backPath)}
-            className="text-4xl"
-            px="px-8"
+            className="text-2xl sm:text-4xl"
+            px="px-4 sm:px-8"
           >
-            <span className="text-2xl">
-            {"<"}
-            </span>
+            <span className="text-xl sm:text-2xl">{"<"}</span>
           </Button>
         </div>
-        {title}
+        <span className="px-12 block truncate">{title}</span>
       </header>
       <motion.main
         className="mx-auto flex w-full flex-1 flex-col gap-2 items-center overflow-y-auto will-change-transform"
