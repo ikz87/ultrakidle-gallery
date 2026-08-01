@@ -22,7 +22,9 @@ export default function App() {
         muted
         loop
         playsInline
-        className="absolute left-0 top-0 h-full w-full object-cover"
+        disablePictureInPicture
+        disableRemotePlayback
+        className="pointer-events-none absolute left-0 top-0 h-full w-full object-cover"
       >
         <source src="/videos/elevator.mp4" type="video/mp4" />
       </video>
