@@ -42,7 +42,7 @@ export default function PageLayout({
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") navigate(backPath);
+      if (e.key === "Escape") navigate(backPath, { replace: true });
     };
 
     handleResize();
@@ -66,7 +66,7 @@ export default function PageLayout({
           <Button
             variant="ghost"
             size={buttonSize}
-            onClick={() => navigate(backPath)}
+            onClick={() => navigate(backPath, { replace: true })}
             className="text-2xl md:text-4xl"
             px="px-4 md:px-8"
           >

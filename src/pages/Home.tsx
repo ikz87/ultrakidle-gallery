@@ -154,7 +154,7 @@ export default function Home() {
       {/* Scrollable Content Layer */}
       <div className="flex-1 pointer-events-auto overflow-y-auto flex flex-col h-dvh">
         <div className="mx-auto w-full max-w-[630px] flex flex-col pt-6 md:pt-16 px-8 flex-shrink-0">
-          <h1 className="text-2xl sm:text-4xl mx-auto pt-3">
+          <h1 className="text-2xl font-extrabold sm:text-4xl mx-auto pt-3">
             -- INFERNOGUESSR --
           </h1>
           <h2 className="text-xl sm:text-3xl mx-auto pt-3">-- GALLERY --</h2>
