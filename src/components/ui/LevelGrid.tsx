@@ -75,7 +75,6 @@ export default function LevelGrid({
           <Link
             to={`/${layerPath}/${sanitizePath(
               secretLevel.levelNumber,
-              secretLevel.name
             )}`}
             className="relative"
           >
@@ -142,7 +141,6 @@ export default function LevelGrid({
               key={level.id}
               to={`/${layerPath}/${sanitizePath(
                 level.levelNumber,
-                level.name
               )}`}
               className={className}
               style={{ width: itemWidth }}
