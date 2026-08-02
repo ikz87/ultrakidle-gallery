@@ -26,7 +26,7 @@ const containerVariants = {
 } as const;
 
 const CHILD_CONTAINER_STYLE =
-  "w-full bg-black/40 p-4 lg:p-10 [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]";
+  "w-full bg-black/40 p-4 md:p-10 [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]";
 
 export default function PageLayout({
   title,
@@ -62,15 +62,15 @@ export default function PageLayout({
         className="relative w-full shrink-0 bg-black/40 py-3 text-center text-base 
         md:text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]"
       >
-        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
+        <div className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2">
           <Button
             variant="ghost"
             size={buttonSize}
             onClick={() => navigate(backPath)}
-            className="text-2xl sm:text-4xl"
-            px="px-4 sm:px-8"
+            className="text-2xl md:text-4xl"
+            px="px-4 md:px-8"
           >
-            <span className="text-xl sm:text-2xl">{"<"}</span>
+            <span className="text-xl md:text-2xl">{"<"}</span>
           </Button>
         </div>
         <span className="px-12 block truncate">{title}</span>

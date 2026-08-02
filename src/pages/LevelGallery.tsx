@@ -6,6 +6,8 @@ import GraphLevelGuessed from "@/components/ui/GraphLevelGuessed";
 import { supabase } from "@/lib/supabase";
 import { levels } from "@/lib/levels_list";
 import SEO from "@/components/SEO";
+import SubmitterProfilePicture from "@/components/ui/SubmitterProfilePicture";
+
 
 
 interface Submission {
@@ -88,7 +90,10 @@ export default function LevelGallery() {
     }
 
     const baseSub = submissions.find((s) => s.id.toString() === imgId);
-    if (!baseSub) return;
+    if (!baseSub) {
+      navigate(`/${layerPath}/${levelName}`);
+      return;
+    }
 
     async function fetchGuesses(sub: Submission) {
       setLoadingGuesses(true);
@@ -98,7 +103,10 @@ export default function LevelGallery() {
         .eq("id_image_submit", imgId);
 
       if (!error && data) {
-        setSelectedSubData({ ...sub, guesses: data as unknown as Submission["guesses"] });
+        setSelectedSubData({
+          ...sub,
+          guesses: data as unknown as Submission["guesses"],
+        });
       } else {
         setSelectedSubData({ ...sub, guesses: [] });
       }
@@ -106,7 +114,7 @@ export default function LevelGallery() {
     }
 
     fetchGuesses(baseSub);
-  }, [imgId, submissions]);
+  }, [imgId, submissions, navigate, layerPath, levelName]);
 
   useEffect(() => {
     if (!loading && imgId && scrollRefs.current[imgId]) {
@@ -174,12 +182,7 @@ export default function LevelGallery() {
               >
                 <div className="flex justify-between items-center mb-2">
                   <div className="flex items-center gap-2">
-                    <img
-                      src={
-                        sub.submitter.discord_avatar_url || "/images/locked.webp"
-                      }
-                      className="w-8 h-8 rounded-full"
-                    />
+                    <SubmitterProfilePicture url={sub.submitter.discord_avatar_url} />
                     <span className="text-sm font-bold truncate max-w-[120px]">
                       {sub.submitter.discord_name}
                     </span>
@@ -254,11 +257,8 @@ export default function LevelGallery() {
               <>
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={
-                        selectedSubData.submitter.discord_avatar_url ||
-                        "/images/locked.webp"
-                      }
+                    <SubmitterProfilePicture
+                      url={selectedSubData.submitter.discord_avatar_url}
                       className="w-10 h-10 rounded-full border-2 border-white"
                     />
                     <div>

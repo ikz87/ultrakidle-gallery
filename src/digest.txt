@@ -1,0 +1,2285 @@
+Directory structure:
+└── src/
+    ├── App.css
+    ├── App.tsx
+    ├── index.css
+    ├── main.tsx
+    ├── components/
+    │   ├── SEO.tsx
+    │   ├── layout/
+    │   │   └── PageLayout.tsx
+    │   └── ui/
+    │       ├── Button.tsx
+    │       ├── GraphLevelGuessed.tsx
+    │       ├── LevelGrid.tsx
+    │       ├── Modal.tsx
+    │       ├── SubmitterProfilePicture.tsx
+    │       └── Tooltip.tsx
+    ├── lib/
+    │   ├── levels_list.ts
+    │   └── supabase.ts
+    └── pages/
+        ├── Act1.tsx
+        ├── Act2.tsx
+        ├── Act3.tsx
+        ├── Encores.tsx
+        ├── Home.tsx
+        ├── LevelGallery.tsx
+        ├── Prelude.tsx
+        └── PrimeSanctums.tsx
+
+================================================
+FILE: App.css
+================================================
+
+#root {
+  background-color: black;
+}
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100dvh;
+  overflow: hidden;
+  background-color: black;
+}
+
+@keyframes scroll-up {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
+  }
+}
+
+
+
+================================================
+FILE: App.tsx
+================================================
+import { Routes, Route, Navigate } from "react-router-dom";
+import "@/App.css";
+import Home from "@/pages/Home";
+import Prelude from "@/pages/Prelude";
+import Act1 from "@/pages/Act1";
+import Act2 from "@/pages/Act2";
+import Act3 from "@/pages/Act3";
+import Encores from "@/pages/Encores";
+import PrimeSanctums from "@/pages/PrimeSanctums";
+import LevelGallery from "@/pages/LevelGallery";
+import SEO from "@/components/SEO";
+
+export default function App() {
+  return (
+    <div className="relative h-dvh w-dvw overflow-hidden bg-black p-0">
+      <SEO 
+        title="INFERNOGUESSR" 
+        description="Ultrakill level guessing gallery" 
+      />
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        disablePictureInPicture
+        disableRemotePlayback
+        className="pointer-events-none absolute left-0 top-0 h-full w-full object-cover"
+      >
+        <source src="/videos/elevator.mp4" type="video/mp4" />
+      </video>
+      <main className="relative z-10 h-full">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/prelude" element={<Prelude />} />
+          <Route path="/act-1" element={<Act1 />} />
+          <Route path="/act-2" element={<Act2 />} />
+          <Route path="/act-3" element={<Act3 />} />
+          <Route path="/encores" element={<Encores />} />
+          <Route path="/prime-sanctums" element={<PrimeSanctums />} />
+          <Route path="/:layerPath/:levelName/:imgId?" element={<LevelGallery />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: index.css
+================================================
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+@font-face {
+  font-family: 'VCR OSD Mono';
+  src: url('/fonts/VCR_OSD_MONO_1.001.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+
+@theme {
+  --font-vcr: "VCR OSD Mono", monospace;
+  --font-atkinson: "Atkinson Hyperlegible", sans-serif;
+}
+
+
+:root {
+  font-family: 'VCR OSD Mono', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  padding: 0;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: white;
+  border-radius: 0;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: auto;
+  scrollbar-color: white transparent;
+}
+
+@keyframes tint-pulse {
+  0%, 100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.97);
+    background-color: rgb(239 68 68 / 0.5);
+  }
+}
+@keyframes inset-pulse {
+  0%, 100% { box-shadow: inset 0 0 40px 20px rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: inset 0 0 40px 20px rgba(239, 68, 68, 0.55); }
+}
+
+
+
+
+================================================
+FILE: main.tsx
+================================================
+import React from "react";
+import ReactDOM from "react-dom/client";
+import { BrowserRouter } from "react-router-dom";
+import { HelmetProvider } from "react-helmet-async";
+import App from "./App.tsx";
+import "./index.css";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <React.StrictMode>
+    <HelmetProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </HelmetProvider>
+  </React.StrictMode>,
+);
+
+
+
+================================================
+FILE: components/SEO.tsx
+================================================
+import { Helmet } from "react-helmet-async";
+
+interface SEOProps {
+  title: string;
+  description?: string;
+  type?: string;
+  image?: string;
+}
+
+export default function SEO({
+  title,
+  description = "Default description",
+  type = "website",
+  image,
+}: SEOProps) {
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <meta property="og:type" content={type} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      {image && <meta property="og:image" content={image} />}
+      {image && <meta name="twitter:card" content="summary_large_image" />}
+      {image && <meta name="twitter:image" content={image} />}
+    </Helmet>
+  );
+}
+
+
+
+================================================
+FILE: components/layout/PageLayout.tsx
+================================================
+import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Button from "@/components/ui/Button";
+
+interface PageLayoutProps {
+  title: string;
+  children: React.ReactNode;
+  backPath?: string;
+}
+
+const containerVariants = {
+  hidden: {
+    opacity: 0,
+    scaleY: 0,
+  },
+  visible: {
+    opacity: 1,
+    scaleY: 1,
+    transition: {
+      duration: 0.05,
+      ease: "easeOut",
+    },
+  },
+} as const;
+
+const CHILD_CONTAINER_STYLE =
+  "w-full bg-black/40 p-4 lg:p-10 [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]";
+
+export default function PageLayout({
+  title,
+  children,
+  backPath = "/",
+}: PageLayoutProps) {
+  const navigate = useNavigate();
+  const [buttonSize, setButtonSize] = useState<"lg" | "xl">("xl");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setButtonSize(window.innerWidth < 640 ? "lg" : "xl");
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") navigate(backPath);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [navigate, backPath]);
+
+  return (
+    <div className="flex h-dvh w-full flex-col p-2 gap-2 overflow-hidden">
+      <SEO title={`${title} | INFERNOGUESSR GALLERY`} />
+      <header
+        className="relative w-full shrink-0 bg-black/40 py-3 text-center text-base 
+        md:text-4xl [clip-path:polygon(10px_0,calc(100%_-_10px)_0,100%_10px,100%_calc(100%_-_10px),calc(100%_-_10px)_100%,10px_100%,0_calc(100%_-_10px),0_10px)]"
+      >
+        <div className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2">
+          <Button
+            variant="ghost"
+            size={buttonSize}
+            onClick={() => navigate(backPath)}
+            className="text-2xl sm:text-4xl"
+            px="px-4 sm:px-8"
+          >
+            <span className="text-xl sm:text-2xl">{"<"}</span>
+          </Button>
+        </div>
+        <span className="px-12 block truncate">{title}</span>
+      </header>
+      <motion.main
+        className="mx-auto flex w-full flex-1 flex-col gap-2 items-center overflow-y-auto will-change-transform"
+        style={{ transformOrigin: "center 50vh" }}
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {React.Children.map(children, (child) => (
+          <div className={CHILD_CONTAINER_STYLE}>{child}</div>
+        ))}
+      </motion.main>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: components/ui/Button.tsx
+================================================
+import React from 'react';
+import { motion } from 'framer-motion';
+import type { HTMLMotionProps } from 'framer-motion';
+
+interface ButtonProps extends HTMLMotionProps<"button"> {
+    variant?: 'primary' | 'outline' | 'ghost' | 'danger';
+    size?: 'sm' | 'md' | 'lg' | 'xl';
+    px?: string;
+    py?: string;
+    className?: string;
+}
+
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ className = '', variant = 'primary', size = 'md', px, py, children, ...props }, ref) => {
+        // Shared clip-paths for different sizes
+        const polygons = {
+            sm: '[clip-path:polygon(2px_0,calc(100%-2px)_0,100%_2px,100%_calc(100%-2px),calc(100%-2px)_100%,2px_100%,0_calc(100%-2px),0_2px)]',
+            md: '[clip-path:polygon(4px_0,calc(100%-4px)_0,100%_4px,100%_calc(100%-4px),calc(100%-4px)_100%,4px_100%,0_calc(100%-4px),0_4px)]',
+            lg: '[clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]',
+            xl: '[clip-path:polygon(10px_0,calc(100%-10px)_0,100%_10px,100%_calc(100%-10px),calc(100%-10px)_100%,10px_100%,0_calc(100%-10px),0_10px)]',
+        };
+
+        const poly = polygons[size];
+
+        // Button variants handling: Outer background is the border color, Inner is the fill
+        const variants = {
+            primary: {
+                outer: 'bg-white',
+                inner: 'bg-white text-black',
+            },
+            outline: {
+                outer: 'bg-white',
+                inner: 'bg-black text-white',
+            },
+            ghost: {
+                outer: 'bg-transparent',
+                inner: 'bg-transparent text-white group-hover:bg-white/10',
+            },
+            danger: {
+                outer: 'bg-white',
+                inner: 'bg-black text-[#FF8000]',
+            },
+        };
+
+        const currentVariant = variants[variant as keyof typeof variants] || variants.primary;
+
+        const sizes = {
+            sm: 'text-xs',
+            md: 'text-sm',
+            lg: 'text-base',
+            xl: 'text-xl md:text-2xl lg:text-3xl',
+        };
+
+        const padding = {
+            sm: 'p-[1px]', // 1px border
+            md: 'p-[2px]', // 2px border
+            lg: 'p-[2px]',
+            xl: 'p-[2px] md:p-[3px]', // 3px border for giant buttons
+        };
+
+        const innerPadding = {
+            sm: 'px-3 py-1',
+            md: 'px-6 py-2',
+            lg: 'px-8 py-3',
+            xl: 'px-8 py-3 md:px-10 md:py-4 lg:px-14 lg:py-5',
+        };
+
+        const currentInnerPadding = `${px || innerPadding[size].split(' ')[0]} ${py || innerPadding[size].split(' ')[1]}`;
+
+        // Motion variants logic
+        const getMotionProps = () => {
+            if (variant === 'primary') {
+                return {
+                    whileHover: {},
+                    whileTap: {
+                        backgroundColor: '#ef4444',
+                        transition: { duration: 0 },
+                    },
+                };
+            }
+            if (variant === 'outline') {
+                return {
+                    whileHover: {
+                        opacity: 0.5,
+                        transition: { duration: 0.1 },
+                    },
+                    whileTap: {
+                        backgroundColor: '#ef4444',
+                        transition: { duration: 0 },
+                    },
+                };
+            }
+            if (variant === 'danger') {
+                return {
+                    whileHover: {
+                        opacity: 0.5,
+                        transition: { duration: 0.1 },
+                    },
+                    whileTap: {
+                        backgroundColor: '#ef4444',
+                        transition: { duration: 0 },
+                    },
+                };
+            }
+            return {};
+        };
+
+        const getInnerMotionProps = () => {
+            if (variant === 'primary') {
+                return {
+                    whileTap: {
+                        backgroundColor: '#ef4444',
+                        color: '#ffffff',
+                        transition: { duration: 0 },
+                    },
+                };
+            }
+            return {};
+        };
+
+        return (
+            <motion.button
+                ref={ref}
+                className={`group relative inline-flex items-center justify-center font-bold select-none disabled:!opacity-50 disabled:pointer-events-none uppercase tracking-tighter cursor-pointer ${poly} ${currentVariant.outer} ${padding[size]} ${className}`}
+                {...getMotionProps()}
+                {...props as HTMLMotionProps<"button">}
+            >
+                <motion.div
+                    className={`w-full h-full flex items-center justify-center ${poly} ${currentVariant.inner} ${sizes[size]} ${currentInnerPadding}`}
+                    {...getInnerMotionProps()}
+                >
+                    {children}
+                </motion.div>
+            </motion.button>
+        );
+    }
+);
+
+Button.displayName = 'Button';
+
+export default Button;
+
+
+
+================================================
+FILE: components/ui/GraphLevelGuessed.tsx
+================================================
+import { levels } from "../../lib/levels_list";
+import Tooltip from "./Tooltip";
+import { useMemo } from "react";
+
+interface GraphLevelGuessedProps {
+  guessesMap: Map<number, number>;
+  correct_level_id: number;
+  showLabel?: boolean;
+}
+
+const GraphLevelGuessed = ({
+  guessesMap,
+  correct_level_id,
+  showLabel = true,
+}: GraphLevelGuessedProps) => {
+    const { total, max } = useMemo(() => {
+      if (!guessesMap || !(guessesMap instanceof Map)) {
+        return { total: 0, max: 0 };
+      }
+      const values = Array.from(guessesMap.values());
+      return {
+        total: values.reduce((a, b) => a + b, 0),
+          max: values.length > 0 ? Math.max(...values) : 0,
+      };
+    }, [guessesMap]);
+
+  return (
+    <div className="w-full pt-2">
+      <div className="flex flex-row items-end h-[40px] w-full gap-[1px]">
+        {levels.map((level) => {
+          const count = guessesMap.get(level.id) || 0;
+          const percent = total > 0 ? Math.round((count / total) * 100) : 0;
+          const barHeight = max > 0 ? Math.max(4, (100 * count) / max) : 4;
+          const isCorrect = correct_level_id === level.id;
+
+          return (
+            <div
+              key={level.id}
+              className="relative flex flex-col items-center h-full justify-end flex-1"
+            >
+              <Tooltip
+                content={
+                  <div className="text-center text-[10px]">
+                    <p className="font-bold">{level.levelNumber}</p>
+                    <p>{count} Guesses ({percent}%)</p>
+                  </div>
+                }
+                placement="top"
+              >
+                <div
+                  className={`w-full transition-opacity ${
+                    isCorrect ? "bg-green-500 opacity-100" : "bg-white/20 opacity-60 hover:opacity-100"
+                  }`}
+                  style={{ height: `${barHeight}%`, borderRadius: "1px" }}
+                />
+              </Tooltip>
+            </div>
+          );
+        })}
+      </div>
+      {showLabel && (
+        <p className="text-white/30 text-center text-xs mt-1 uppercase tracking-widest">
+          Guess Distribution
+        </p>
+      )}
+    </div>
+  );
+};
+
+export default GraphLevelGuessed;
+
+
+
+================================================
+FILE: components/ui/LevelGrid.tsx
+================================================
+import { Link } from "react-router-dom";
+import Button from "./Button";
+import { useState, useEffect } from "react";
+
+interface Level {
+  id: number;
+  levelNumber: string;
+  name: string;
+  thumbnail: string;
+}
+
+interface LevelGridProps {
+  title: string;
+  levels: Level[];
+  maxItemsPerRow: number;
+  maxImgPerRow?: number;
+  layerPath: string;
+  counts?: Record<number, number | string>;
+  secretLevel?: Level;
+  outerPadding?: number;
+}
+
+export default function LevelGrid({
+  title,
+  levels,
+  maxItemsPerRow,
+  maxImgPerRow,
+  layerPath,
+  counts = {},
+  secretLevel,
+  outerPadding = 7,
+}: LevelGridProps) {
+  const [buttonSize, setButtonSize] = useState<"lg" | "xl">("xl");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setButtonSize(window.innerWidth < 640 ? "lg" : "xl");
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const imgConstraint = maxImgPerRow || maxItemsPerRow;
+  const gap = 0.5;
+  const pad = outerPadding;
+  const sub = (n: number) => (pad + (n - 1) * gap) / n;
+
+  const itemWidth = `max(calc(${100 / maxItemsPerRow}vw - ${
+    sub(maxItemsPerRow)
+  }rem), 20rem)`;
+
+  const imgWidth = maxImgPerRow
+    ? `min(100%, max(calc(${100 / imgConstraint}vw - ${
+        sub(imgConstraint) + 4.5
+      }rem), 15.5rem))`
+    : "100%";
+
+  const sanitizePath = (levelNumber: string, name: string) => {
+    return `${levelNumber}-${name}`
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+  };
+
+  return (
+    <div className="w-full">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+        <h1
+          className={`text-2xl md:text-6xl uppercase ${
+            secretLevel ? "" : "pb-4"
+          }`}
+        >
+          {title}
+        </h1>
+        {secretLevel && (
+          <Link
+            to={`/${layerPath}/${sanitizePath(
+              secretLevel.levelNumber,
+              secretLevel.name
+            )}`}
+            className="relative"
+          >
+            <Button className="mb-2" size={buttonSize} variant="outline">
+              <div className="py-1 px-4 md:py-2 md:px-6 text-sm md:text-base">
+                SECRET MISSION
+              </div>
+            </Button>
+            <div
+              className="absolute -top-2 -right-2 bg-white text-black text-xs md:text-md 
+              [clip-path:polygon(4px_0,calc(100%-4px)_0,100%_4px,100%_calc(100%-4px),calc(100%-4px)_100%,4px_100%,0_calc(100%-4px),0_4px)] 
+              font-bold px-2 py-0.5 pointer-events-none"
+            >
+              {counts[secretLevel.id] || 0}
+            </div>
+          </Link>
+        )}
+      </div>
+      <div className="w-full h-0.5 bg-white mb-8" />
+
+      <div className="flex gap-2 flex-wrap justify-center">
+        {levels.map((level, idx) => {
+          const isPlaceholder = level.id === -1;
+          const content = (
+            <>
+              <p className="w-full text-base md:text-[20px] tracking-tighter text-center">
+                {level.levelNumber}: {level.name.toUpperCase()}
+              </p>
+              <div className="w-full h-0.5 bg-white mb-3" />
+              <div className="w-full px-5 mt-auto mb-auto flex justify-center">
+                <div style={{ width: imgWidth }}>
+                  <img
+                    src={level.thumbnail}
+                    alt={level.name}
+                    className="w-full aspect-video object-cover"
+                    loading="lazy"
+                  />
+                </div>
+              </div>
+              <div className="w-full h-0.5 bg-white mt-3" />
+              <div className="uppercase text-xs md:text-sm">
+                {counts[level.id] ?? (isPlaceholder ? "???" : 0)} SUBMISSIONS
+              </div>
+            </>
+          );
+
+          const className =
+            "relative flex flex-col bg-black/40 p-4 will-change-transform [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)]";
+
+          if (isPlaceholder) {
+            return (
+              <div
+                key={`placeholder-${idx}`}
+                className={className}
+                style={{ width: itemWidth }}
+              >
+                {content}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={level.id}
+              to={`/${layerPath}/${sanitizePath(
+                level.levelNumber,
+                level.name
+              )}`}
+              className={className}
+              style={{ width: itemWidth }}
+            >
+              {content}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: components/ui/Modal.tsx
+================================================
+import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import Button from "./Button";
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: ReactNode;
+  showCloseButton?: boolean;
+  allowBackdropClose?: boolean;
+  showFooterButton?: boolean;
+  footerButtonText?: string;
+  footerText?: string;
+  maxWidth?: string;
+}
+
+const outerClip =
+  "[clip-path:polygon(16px_0,calc(100%-16px)_0,100%_16px,100%_calc(100%-16px),calc(100%-16px)_100%,16px_100%,0_calc(100%-16px),0_16px)]";
+const innerClip =
+  "[clip-path:polygon(12px_0,calc(100%-12px)_0,100%_12px,100%_calc(100%-12px),calc(100%-12px)_100%,12px_100%,0_calc(100%-12px),0_12px)]";
+
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  footerText,
+  children,
+  showCloseButton = true,
+  allowBackdropClose = true,
+  showFooterButton = true,
+  footerButtonText = "Understood",
+  maxWidth = "max-w-lg",
+}: ModalProps) => {
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && allowBackdropClose) onClose();
+    };
+    if (isOpen) window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose, allowBackdropClose]);
+
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <div className="">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={allowBackdropClose ? onClose : undefined}
+            className={`fixed inset-0 bg-black/80 z-[100] ${!allowBackdropClose ? "cursor-default" : "cursor-pointer"}`}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-[101] p-4 pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className={`w-full ${maxWidth} max-h-[80vh] p-[8px] bg-white ${outerClip} pointer-events-auto flex flex-col`}
+            >
+              <div
+                className={`bg-black w-full p-6 shadow-2xl relative flex flex-col min-h-0 flex-1 overflow-hidden ${innerClip}`}
+              >
+                {/* Scanline effect */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_2px,3px_100%]" />
+
+                <div className="flex justify-between items-center mb-6 shrink-0">
+                  {title && (
+                    <h2 className="text-2xl font-bold tracking-tighter text-white uppercase">
+                      {title}
+                    </h2>
+                  )}
+                  {showCloseButton && (
+                    <button
+                      onClick={onClose}
+                      className="text-white/50 hover:text-white transition-colors cursor-pointer uppercase text-sm font-bold"
+                    >
+                      [CLOSE]
+                    </button>
+                  )}
+                </div>
+
+                <div className="text-white/80 space-y-4 overflow-y-auto flex-1 min-h-0 pr-2 custom-scrollbar">
+                  {children}
+                </div>
+
+                { footerText && (
+                  <p className="pt-2 text-white border-t-white border-t-2 text-sm">
+                    {footerText}
+                  </p>
+                )}
+                {showFooterButton && (
+                  <div className="mt-2 shrink-0">
+                    <Button
+                      onClick={onClose}
+                      variant="outline"
+                      size="lg"
+                      className="w-full"
+                    >
+                      {footerButtonText}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
+
+export default Modal;
+
+
+
+================================================
+FILE: components/ui/SubmitterProfilePicture.tsx
+================================================
+interface SubmitterProfilePictureProps {
+  url?: string;
+  className?: string;
+}
+
+export default function SubmitterProfilePicture({
+  url,
+  className = "w-8 h-8 rounded-full",
+}: SubmitterProfilePictureProps) {
+  return (
+    <img
+      src={url || "/images/v1-plush.webp"}
+      className={`${className} object-cover`}
+      alt="Submitter profile"
+    />
+  );
+}
+
+
+
+================================================
+FILE: components/ui/Tooltip.tsx
+================================================
+import { useState, type ReactNode, cloneElement, isValidElement } from "react";
+import {
+    useFloating,
+    autoUpdate,
+    offset,
+    flip,
+    shift,
+    useHover,
+    useFocus,
+    useDismiss,
+    useRole,
+    useInteractions,
+    useClick,
+    FloatingPortal,
+} from "@floating-ui/react";
+
+import type { Placement } from "@floating-ui/react";
+import { AnimatePresence, motion } from "framer-motion";
+
+interface TooltipProps {
+    content: ReactNode;
+    children: ReactNode;
+    placement?: Placement;
+    className?: string;
+    wrapperClassName?: string;
+}
+
+const tooltipOuterClip =
+    "[clip-path:polygon(6px_0,calc(100%-6px)_0,100%_6px,100%_calc(100%-6px),calc(100%-6px)_100%,6px_100%,0_calc(100%-6px),0_6px)]";
+const tooltipInnerClip =
+    "[clip-path:polygon(4px_0,calc(100%-4px)_0,100%_4px,100%_calc(100%-4px),calc(100%-4px)_100%,4px_100%,0_calc(100%-4px),0_4px)]";
+
+export default function Tooltip({
+    content,
+    children,
+    placement = "top",
+    className = "",
+    wrapperClassName = "w-max",
+}: TooltipProps) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    const { refs, floatingStyles, context } = useFloating({
+        open: isOpen,
+        onOpenChange: setIsOpen,
+        placement,
+        whileElementsMounted: autoUpdate,
+        middleware: [
+            offset(8),
+            flip({
+                fallbackAxisSideDirection: "start",
+            }),
+            shift({ padding: 8 }),
+        ],
+    });
+
+    const hover = useHover(context, { move: false });
+    const focus = useFocus(context);
+    const dismiss = useDismiss(context);
+    const role = useRole(context, { role: "tooltip" });
+    const click = useClick(context);
+
+    // Apply interactions
+    const { getReferenceProps, getFloatingProps } = useInteractions([
+        hover,
+        focus,
+        dismiss,
+        role,
+        click, // Adding click gives robust tap behavior on mobile
+    ]);
+
+    // Clone element so we don't introduce a wrapper div which can mess with hover hitboxes
+    const referenceElement = isValidElement(children) ? (
+        cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+            ref: refs.setReference,
+            ...getReferenceProps({
+                ...(children.props as Record<string, unknown>),
+            }),
+        })
+    ) : (
+        <span ref={refs.setReference} {...getReferenceProps()} className={wrapperClassName}>
+            {children}
+        </span>
+    );
+
+
+    return (
+        <>
+            {referenceElement}
+            <FloatingPortal>
+                <AnimatePresence>
+                    {isOpen && (
+                        <div
+                            // eslint-disable-next-line react-hooks/refs
+                            ref={refs.setFloating}
+                            style={floatingStyles}
+                            className={`z-[150] pointer-events-none`}
+                        >
+                            <motion.div
+                                {...getFloatingProps()}
+                                initial={{ opacity: 0, scale: 0.95, y: placement.startsWith("top") ? 5 : placement.startsWith("bottom") ? -5 : 0 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.95, y: placement.startsWith("top") ? 5 : placement.startsWith("bottom") ? -5 : 0 }}
+                                transition={{ duration: 0.15, ease: "easeOut" }}
+                                className={`p-[2px] bg-white pointer-events-auto ${tooltipOuterClip} ${className}`}
+                            >
+                                <div
+                                    className={`bg-black text-white px-3 py-1.5 text-sm font-bold uppercase tracking-tighter relative overflow-hidden ${tooltipInnerClip}`}
+                                >
+                                    <div className="absolute inset-0 pointer-events-none opacity-[0.05] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-10 bg-[length:100%_2px,3px_100%]" />
+                                    <div className="relative z-20 max-w-[60vw]">
+                                        {content}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>
+            </FloatingPortal>
+        </>
+    );
+}
+
+
+
+================================================
+FILE: lib/levels_list.ts
+================================================
+export const levels = [
+  {
+    id: 1,
+    levelNumber: "0-1",
+    name: "Into the Fire",
+    orderIndex: 1,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-1_Into_the_Fire.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-1:_Into_the_Fire",
+  },
+  {
+    id: 2,
+    levelNumber: "0-2",
+    name: "The Meatgrinder",
+    orderIndex: 2,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-2_The_Meatgrinder.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-2:_The_Meatgrinder",
+  },
+  {
+    id: 3,
+    levelNumber: "0-3",
+    name: "Double Down",
+    orderIndex: 3,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-3_Double_Down.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-3:_Double_Down",
+  },
+  {
+    id: 4,
+    levelNumber: "0-4",
+    name: "A One-Machine Army",
+    orderIndex: 4,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-4_A_One-Machine_Army.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-4:_A_One-Machine_Army",
+  },
+  {
+    id: 5,
+    levelNumber: "0-5",
+    name: "Cerberus",
+    orderIndex: 5,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-5_Cerberus.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-5:_Cerberus",
+  },
+  {
+    id: 7,
+    levelNumber: "0-S",
+    name: "Something Wicked",
+    orderIndex: 6,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-S_Something_Wicked.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-S:_Something_Wicked",
+  },
+  {
+    id: 6,
+    levelNumber: "0-E",
+    name: "This Heat, An Evil Heat",
+    orderIndex: 7,
+    thumbnail: "https://ultrakill.wiki.gg/images/0-E_This_Heat%2C_An_Evil_Heat.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/0-E:_This_Heat,_An_Evil_Heat",
+  },
+  {
+    id: 8,
+    levelNumber: "1-1",
+    name: "Heart of the Sunrise",
+    orderIndex: 8,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-1_Heart_of_the_Sunrise.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-1:_Heart_of_the_Sunrise",
+  },
+  {
+    id: 9,
+    levelNumber: "1-2",
+    name: "The Burning World",
+    orderIndex: 9,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-2_The_Burning_World.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-2:_The_Burning_World",
+  },
+  {
+    id: 10,
+    levelNumber: "1-3",
+    name: "Halls of Sacred Remains",
+    orderIndex: 10,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-3_Halls_of_Sacred_Remains.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-3:_Halls_of_Sacred_Remains",
+  },
+  {
+    id: 11,
+    levelNumber: "1-4",
+    name: "Clair de Lune",
+    orderIndex: 11,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-4_Clair_de_Lune.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-4:_Clair_de_Lune",
+  },
+  {
+    id: 13,
+    levelNumber: "1-S",
+    name: "The Witless",
+    orderIndex: 12,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-S_The_Witless.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-S:_The_Witless",
+  },
+  {
+    id: 12,
+    levelNumber: "1-E",
+    name: "...Then Fell the Ashes",
+    orderIndex: 13,
+    thumbnail: "https://ultrakill.wiki.gg/images/1-E_...Then_Fell_the_Ashes.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/1-E:_...Then_Fell_the_Ashes",
+  },
+  {
+    id: 14,
+    levelNumber: "2-1",
+    name: "Bridgeburner",
+    orderIndex: 14,
+    thumbnail: "https://ultrakill.wiki.gg/images/2-1_In_the_Air_Tonight.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/2-1:_Bridgeburner",
+  },
+  {
+    id: 15,
+    levelNumber: "2-2",
+    name: "Death at 20,000 Volts",
+    orderIndex: 15,
+    thumbnail: "https://ultrakill.wiki.gg/images/2-2_Death_at_20%2C000_Volts.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/2-2:_Death_at_20,000_Volts",
+  },
+  {
+    id: 16,
+    levelNumber: "2-3",
+    name: "Sheer Heart Attack",
+    orderIndex: 16,
+    thumbnail: "https://ultrakill.wiki.gg/images/2-3_Sheer_Heart_Attack.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/2-3:_Sheer_Heart_Attack",
+  },
+  {
+    id: 17,
+    levelNumber: "2-4",
+    name: "Court of the Corpse King",
+    orderIndex: 17,
+    thumbnail: "https://ultrakill.wiki.gg/images/2-4_Court_of_the_Corpse_King.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/2-4:_Court_of_the_Corpse_King",
+  },
+  {
+    id: 18,
+    levelNumber: "2-S",
+    name: "All-Imperfect Love Song",
+    orderIndex: 18,
+    thumbnail: "https://ultrakill.wiki.gg/images/2-S_All-Imperfect_Love_Song.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/2-S:_All-Imperfect_Love_Song",
+  },
+  {
+    id: 19,
+    levelNumber: "3-1",
+    name: "Belly of the Beast",
+    orderIndex: 19,
+    thumbnail: "https://ultrakill.wiki.gg/images/3-1_Belly_of_the_Beast.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/3-1:_Belly_of_the_Beast",
+  },
+  {
+    id: 20,
+    levelNumber: "3-2",
+    name: "In the Flesh",
+    orderIndex: 20,
+    thumbnail: "https://ultrakill.wiki.gg/images/3-2_In_the_Flesh.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/3-2:_In_the_Flesh",
+  },
+  {
+    id: 42,
+    levelNumber: "P-1",
+    name: "Soul Survivor",
+    orderIndex: 21,
+    thumbnail: "https://ultrakill.wiki.gg/images/P-1_Soul_Survivor.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/P-1:_Soul_Survivor",
+  },
+  {
+    id: 21,
+    levelNumber: "4-1",
+    name: "Slaves to Power",
+    orderIndex: 22,
+    thumbnail: "https://ultrakill.wiki.gg/images/4-1_Slaves_to_Power.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/4-1:_Slaves_to_Power",
+  },
+  {
+    id: 22,
+    levelNumber: "4-2",
+    name: "God Damn the Sun",
+    orderIndex: 23,
+    thumbnail: "https://ultrakill.wiki.gg/images/4-2_God_Damn_the_Sun.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/4-2:_God_Damn_the_Sun",
+  },
+  {
+    id: 23,
+    levelNumber: "4-3",
+    name: "A Shot in the Dark",
+    orderIndex: 24,
+    thumbnail: "https://ultrakill.wiki.gg/images/4-3_A_Shot_in_the_Dark.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/4-3:_A_Shot_in_the_Dark",
+  },
+  {
+    id: 24,
+    levelNumber: "4-4",
+    name: "Clair de Soleil",
+    orderIndex: 25,
+    thumbnail: "https://ultrakill.wiki.gg/images/4-4_Clair_de_Soleil.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/4-4:_Clair_de_Soleil",
+  },
+  {
+    id: 25,
+    levelNumber: "4-S",
+    name: "Clash of the Brandicoot",
+    orderIndex: 26,
+    thumbnail: "https://ultrakill.wiki.gg/images/4-S_Clash_of_the_Brandicoot.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/4-S:_Clash_of_the_Brandicoot",
+  },
+  {
+    id: 26,
+    levelNumber: "5-1",
+    name: "In the Wake of Poseidon",
+    orderIndex: 27,
+    thumbnail: "https://ultrakill.wiki.gg/images/5-1_In_the_Wake_of_Poseidon.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/5-1:_In_the_Wake_of_Poseidon",
+  },
+  {
+    id: 27,
+    levelNumber: "5-2",
+    name: "Waves of the Starless Sea",
+    orderIndex: 28,
+    thumbnail: "https://ultrakill.wiki.gg/images/5-2_Waves_of_the_Starless_Sea.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/5-2:_Waves_of_the_Starless_Sea",
+  },
+  {
+    id: 28,
+    levelNumber: "5-3",
+    name: "Ship of Fools",
+    orderIndex: 29,
+    thumbnail: "https://ultrakill.wiki.gg/images/5-3_Ship_of_Fools.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/5-3:_Ship_of_Fools",
+  },
+  {
+    id: 29,
+    levelNumber: "5-4",
+    name: "Leviathan",
+    orderIndex: 30,
+    thumbnail: "https://ultrakill.wiki.gg/images/5-4_Leviathan.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/5-4:_Leviathan",
+  },
+  {
+    id: 30,
+    levelNumber: "5-S",
+    name: "I Only Say Morning",
+    orderIndex: 31,
+    thumbnail: "https://ultrakill.wiki.gg/images/5-S_I_Only_Say_Morning.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/5-S:_I_Only_Say_Morning",
+  },
+  {
+    id: 31,
+    levelNumber: "6-1",
+    name: "Cry for the Weeper",
+    orderIndex: 32,
+    thumbnail: "https://ultrakill.wiki.gg/images/6-1_Cry_for_the_Weeper.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/6-1:_Cry_for_the_Weeper",
+  },
+  {
+    id: 32,
+    levelNumber: "6-2",
+    name: "Aesthetics of Hate",
+    orderIndex: 33,
+    thumbnail: "https://ultrakill.wiki.gg/images/6-2_Aesthetics_of_Hate.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/6-2:_Aesthetics_of_Hate",
+  },
+  {
+    id: 43,
+    levelNumber: "P-2",
+    name: "Wait of the World",
+    orderIndex: 34,
+    thumbnail: "https://ultrakill.wiki.gg/images/P-2_Wait_of_the_World.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/P-2:_Wait_of_the_World",
+  },
+  {
+    id: 33,
+    levelNumber: "7-1",
+    name: "Garden of Forking Paths",
+    orderIndex: 35,
+    thumbnail: "https://ultrakill.wiki.gg/images/7-1_Garden_of_Forking_Paths.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/7-1:_Garden_of_Forking_Paths",
+  },
+  {
+    id: 34,
+    levelNumber: "7-2",
+    name: "Light Up the Night",
+    orderIndex: 36,
+    thumbnail: "https://ultrakill.wiki.gg/images/7-2_Light_Up_the_Night.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/7-2:_Light_Up_the_Night",
+  },
+  {
+    id: 35,
+    levelNumber: "7-3",
+    name: "No Sound, No Memory",
+    orderIndex: 37,
+    thumbnail: "https://ultrakill.wiki.gg/images/7-3_No_Sound_No_Memory.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/7-3:_No_Sound,_No_Memory",
+  },
+  {
+    id: 36,
+    levelNumber: "7-4",
+    name: "...Like Antennas to Heaven",
+    orderIndex: 38,
+    thumbnail: "https://ultrakill.wiki.gg/images/7-4_Like_Antennas_to_Heaven.webp",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/7-4:_...Like_Antennas_to_Heaven",
+  },
+  {
+    id: 37,
+    levelNumber: "7-S",
+    name: "Hell Bath No Fury",
+    orderIndex: 39,
+    thumbnail: "https://ultrakill.wiki.gg/images/7-S_Hell_Bath_No_Fury.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/7-S:_Hell_Bath_No_Fury",
+  },
+  {
+    id: 38,
+    levelNumber: "8-1",
+    name: "Hurtbreak Wonderland",
+    orderIndex: 40,
+    thumbnail: "https://ultrakill.wiki.gg/images/8-1_Hurtbreak_Wonderland.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/8-1:_Hurtbreak_Wonderland",
+  },
+  {
+    id: 39,
+    levelNumber: "8-2",
+    name: "Through the Mirror",
+    orderIndex: 41,
+    thumbnail: "https://ultrakill.wiki.gg/images/8-2_Through_the_Mirror.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/8-2:_Through_the_Mirror",
+  },
+  {
+    id: 40,
+    levelNumber: "8-3",
+    name: "Disintegration Loop",
+    orderIndex: 42,
+    thumbnail: "https://ultrakill.wiki.gg/images/8-3_Disintegration_Loop.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/8-3:_Disintegration_Loop",
+  },
+  {
+    id: 41,
+    levelNumber: "8-4",
+    name: "Final Flight",
+    orderIndex: 43,
+    thumbnail: "https://ultrakill.wiki.gg/images/8-4_Final_Flight.png",
+    wikiLink: "https://ultrakill.wiki.gg/wiki/8-4:_Final_Flight",
+  },
+];
+
+
+
+================================================
+FILE: lib/supabase.ts
+================================================
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_DEFAULT;
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+
+
+================================================
+FILE: pages/Act1.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function Act1() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  const getLayerData = (layerNum: string) => {
+    const layerLevels = levels
+      .filter((l) => new RegExp(`^${layerNum}-[0-9]`).test(l.levelNumber))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const secretLevel = levels.find((l) => l.levelNumber === `${layerNum}-S`);
+    return { layerLevels, secretLevel };
+  };
+
+  const layer1 = getLayerData("1");
+  const layer2 = getLayerData("2");
+  const layer3 = getLayerData("3");
+
+  return (
+    <PageLayout title="ACT I: INFINITE HYPERDEATH">
+      <div className="flex flex-col gap-20">
+        <LevelGrid
+          title="Layer 1: Limbo"
+          levels={layer1.layerLevels}
+          maxItemsPerRow={4}
+          layerPath="act-1"
+          counts={counts}
+          secretLevel={layer1.secretLevel}
+        />
+      </div>
+      <div className="flex flex-col gap-20">
+        <LevelGrid
+          title="Layer 2: Lust"
+          levels={layer2.layerLevels}
+          maxItemsPerRow={4}
+          layerPath="act-1"
+          counts={counts}
+          secretLevel={layer2.secretLevel}
+        />
+      </div>
+      <div className="flex flex-col gap-20">
+        <LevelGrid
+          title="Layer 3: Gluttony"
+          levels={layer3.layerLevels}
+          maxItemsPerRow={2}
+          maxImgPerRow={4}
+          layerPath="act-1"
+          counts={counts}
+          secretLevel={layer3.secretLevel}
+        />
+      </div>
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/Act2.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function Act2() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  const getLayerData = (layerNum: string) => {
+    const layerLevels = levels
+      .filter((l) => new RegExp(`^${layerNum}-[0-9]`).test(l.levelNumber))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const secretLevel = levels.find((l) => l.levelNumber === `${layerNum}-S`);
+    return { layerLevels, secretLevel };
+  };
+
+  const layer4 = getLayerData("4");
+  const layer5 = getLayerData("5");
+  const layer6 = getLayerData("6");
+
+  return (
+    <PageLayout title="ACT II: IMPERFECT HATRED">
+      <LevelGrid
+        title="Layer 4: Greed"
+        levels={layer4.layerLevels}
+        maxItemsPerRow={4}
+        layerPath="act-2"
+        counts={counts}
+        secretLevel={layer4.secretLevel}
+      />
+      <LevelGrid
+        title="Layer 5: Wrath"
+        levels={layer5.layerLevels}
+        maxItemsPerRow={4}
+        layerPath="act-2"
+        counts={counts}
+        secretLevel={layer5.secretLevel}
+      />
+      <LevelGrid
+        title="Layer 6: Heresy"
+        levels={layer6.layerLevels}
+        maxItemsPerRow={4}
+        maxImgPerRow={4}
+        layerPath="act-2"
+        counts={counts}
+        secretLevel={layer6.secretLevel}
+      />
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/Act3.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function Act3() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  const getLayerData = (layerNum: string) => {
+    const layerLevels = levels
+      .filter((l) => new RegExp(`^${layerNum}-[0-9]`).test(l.levelNumber))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    const secretLevel = levels.find((l) => l.levelNumber === `${layerNum}-S`);
+    return { layerLevels, secretLevel };
+  };
+
+  const layer7 = getLayerData("7");
+  const layer8 = getLayerData("8");
+
+  const layer9Placeholders = [
+    {
+      id: -1,
+      levelNumber: "9-1",
+      name: "???",
+      thumbnail: "/images/locked.webp",
+    },
+    {
+      id: -1,
+      levelNumber: "9-2",
+      name: "???",
+      thumbnail: "/images/locked.webp",
+    },
+  ];
+
+  return (
+    <PageLayout title="ACT III: GODFIST SUICIDE">
+      <LevelGrid
+        title="Layer 7: Violence"
+        levels={layer7.layerLevels}
+        maxItemsPerRow={4}
+        layerPath="act-3"
+        counts={counts}
+        secretLevel={layer7.secretLevel}
+      />
+      <LevelGrid
+        title="Layer 8: Fraud"
+        levels={layer8.layerLevels}
+        maxItemsPerRow={4}
+        layerPath="act-3"
+        counts={counts}
+        secretLevel={layer8.secretLevel}
+      />
+      <LevelGrid
+        title="Layer 9: Treachery"
+        levels={layer9Placeholders}
+        maxItemsPerRow={2}
+        maxImgPerRow={4}
+        layerPath="act-3"
+        counts={{ [-1]: "???" }}
+      />
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/Encores.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function Encores() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  const manifestEncores = levels
+    .filter((l) => /^[0-9]-E$/.test(l.levelNumber))
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const placeholders = Array.from({ length: 10 - manifestEncores.length }, (_, i) => {
+    const layerNum = manifestEncores.length + i;
+    return {
+      id: -1,
+      levelNumber: `${layerNum}-E`,
+      name: "???",
+      thumbnail: "/images/locked.webp",
+    };
+  });
+
+  const allEncores = [...manifestEncores, ...placeholders];
+
+  const placeholderCounts = placeholders.reduce((acc, curr) => {
+    acc[curr.id] = "???";
+    return acc;
+  }, {} as Record<number, number | string>);
+
+  return (
+    <PageLayout title="ENCORES">
+      <LevelGrid
+        title="Encores"
+        levels={allEncores}
+        maxItemsPerRow={5}
+        layerPath="encores"
+        counts={{ ...counts, ...placeholderCounts }}
+      />
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/Home.tsx
+================================================
+import Button from "@/components/ui/Button";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import SEO from "@/components/SEO";
+import { useState, useEffect } from "react";
+
+const SECTIONS = {
+  primary: [
+    { title: "PRELUDE", path: "/prelude" },
+    { title: "ACT I: INFINITE HYPERDEATH", path: "/act-1" },
+    { title: "ACT II: IMPERFECT HATRED", path: "/act-2" },
+    { title: "ACT III: GODFIST SUICIDE", path: "/act-3" },
+  ],
+  secondary: [
+    { title: "ENCORES", path: "/encores" },
+    { title: "PRIME SANCTUMS", path: "/prime-sanctums" },
+    { title: "SUBMITTER SEARCH", path: "/submitter-search" },
+  ],
+};
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.03,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: {
+    display: "none",
+    opacity: 0,
+  },
+  visible: {
+    display: "block",
+    opacity: 1,
+    transition: { duration: 0.02 },
+  },
+};
+
+type MenuItem = { title: string; path: string };
+
+function MenuButton({
+  item,
+  size,
+}: {
+  item: MenuItem;
+  size: "lg" | "xl";
+}) {
+  return (
+    <Link to={item.path}>
+      <Button className="w-full" size={size} variant="outline">
+        <div className="w-full text-left">{item.title}</div>
+      </Button>
+    </Link>
+  );
+}
+
+function MenuContent({
+  size,
+  animated,
+}: {
+  size: "lg" | "xl";
+  animated: boolean;
+}) {
+  const Wrapper = animated ? motion.div : "div";
+  const Item = animated ? motion.div : "div";
+  const Text = animated ? motion.p : "p";
+
+  const wrapperProps = animated
+    ? {
+        initial: "hidden" as const,
+        animate: "visible" as const,
+        variants: containerVariants,
+      }
+    : {};
+
+  const itemProps = animated ? { variants: itemVariants } : {};
+
+  return (
+    <Wrapper
+      className="mx-auto w-full max-w-[630px] flex flex-col px-8"
+      {...wrapperProps}
+    >
+      <Text {...itemProps} className="text-2xl sm:text-3xl">
+        PRIMARY
+      </Text>
+      <Item
+        {...itemProps}
+        className="w-full h-0.5 bg-white md:mb-3 mb-2"
+      />
+      <div className="flex flex-col md:gap-2 gap-1">
+        {SECTIONS.primary.map((item) => (
+          <Item key={item.path} {...itemProps}>
+            <MenuButton item={item} size={size} />
+          </Item>
+        ))}
+      </div>
+
+      <Text {...itemProps} className="text-2xl sm:text-3xl pt-10">
+        SECONDARY
+      </Text>
+      <Item
+        {...itemProps}
+        className="w-full h-0.5 bg-white md:mb-3 mb-2"
+      />
+      <div className="flex flex-col md:gap-2 gap-1">
+        {SECTIONS.secondary.map((item) => (
+          <Item key={item.path} {...itemProps}>
+            <MenuButton item={item} size={size} />
+          </Item>
+        ))}
+      </div>
+    </Wrapper>
+  );
+}
+
+export default function Home() {
+  const [buttonSize, setButtonSize] = useState<"lg" | "xl">("xl");
+
+  useEffect(() => {
+    const handleResize = () => {
+      setButtonSize(window.innerWidth < 640 ? "lg" : "xl");
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  return (
+    <div className="relative h-screen w-full overflow-hidden flex flex-col">
+      <SEO title="HOME | INFERNOGUESSR" />
+
+      {/* Background Layer */}
+      <div className="-z-10 absolute inset-0 flex items-start justify-center pointer-events-none">
+        <div
+          className="flex flex-col"
+          style={{ animation: "scroll-up 30s linear infinite" }}
+        >
+          {Array.from({ length: 8 }).map((_, i) => (
+            <img
+              key={i}
+              src="/images/terminal-bg-stacking.webp"
+              alt=""
+              className="w-auto block"
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Scrollable Content Layer */}
+      <div className="flex-1 pointer-events-auto overflow-y-auto flex flex-col h-dvh">
+        <div className="mx-auto w-full max-w-[630px] flex flex-col pt-6 md:pt-16 px-8 flex-shrink-0">
+          <h1 className="text-2xl sm:text-4xl mx-auto pt-3">
+            -- INFERNOGUESSR --
+          </h1>
+          <h2 className="text-xl sm:text-3xl mx-auto pt-3">-- GALLERY --</h2>
+        </div>
+
+        <div className="md:py-12 py-8 grid w-full">
+          {/* Placeholder: reserves final height, top-aligned */}
+          <div className="[grid-area:1/1] invisible pointer-events-none ">
+            <MenuContent size={buttonSize} animated={false} />
+          </div>
+
+          {/* Animated content: overlays placeholder, grows from center */}
+          <div className="[grid-area:1/1] flex items-center justify-center">
+            <MenuContent size={buttonSize} animated={true} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+================================================
+FILE: pages/LevelGallery.tsx
+================================================
+import { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import Modal from "@/components/ui/Modal";
+import PageLayout from "@/components/layout/PageLayout";
+import GraphLevelGuessed from "@/components/ui/GraphLevelGuessed";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list";
+import SEO from "@/components/SEO";
+import SubmitterProfilePicture from "@/components/ui/SubmitterProfilePicture";
+
+
+
+interface Submission {
+  id: number;
+  storage_path: string;
+  times_picked: number;
+  avg_score: number;
+  avg_time: number;
+  created_at: string;
+  level_id: number;
+  submitter: {
+    discord_name: string;
+    discord_avatar_url: string;
+  };
+  guesses?: {
+    level_id: number;
+    amount: number;
+  }[];
+}
+
+export default function LevelGallery() {
+  const { layerPath, levelName, imgId } = useParams();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [selectedSubData, setSelectedSubData] = useState<Submission | null>(null);
+  const [loadingGuesses, setLoadingGuesses] = useState(false);
+  const scrollRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
+
+  const currentSub = submissions.find((s) => s.id.toString() === imgId);
+  const ogImage = currentSub 
+    ? `https://images.ultrakidle.online/${currentSub.storage_path}` 
+    : undefined;
+
+  const level = levels.find((l) => {
+    const slug = `${l.levelNumber}-${l.name}`
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-");
+    return slug === levelName;
+  });
+
+  useEffect(() => {
+    if (!level) return;
+
+    async function fetchLevelData() {
+      const { data, error } = await supabase
+      .from("image_submissions")
+      .select(
+        `
+        id,
+        storage_path,
+        times_picked,
+        avg_score,
+        avg_time,
+        created_at,
+        level_id,
+        submitter:submitter_profiles (
+          discord_name,
+          discord_avatar_url
+        )
+        `
+      )
+      .eq("level_id", level!.id)
+      .eq("status", "approved")
+      .order("created_at", { ascending: false });
+
+      if (!error && data) setSubmissions(data as unknown as Submission[]);
+      setLoading(false);
+    }
+
+    fetchLevelData();
+  }, [level]);
+
+  useEffect(() => {
+    if (!imgId || submissions.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSelectedSubData(null);
+      return;
+    }
+
+    const baseSub = submissions.find((s) => s.id.toString() === imgId);
+    if (!baseSub) return;
+
+    async function fetchGuesses(sub: Submission) {
+      setLoadingGuesses(true);
+      const { data, error } = await supabase
+        .from("inferno_image_guesses")
+        .select("level_id:id_level, amount")
+        .eq("id_image_submit", imgId);
+
+      if (!error && data) {
+        setSelectedSubData({ ...sub, guesses: data as unknown as Submission["guesses"] });
+      } else {
+        setSelectedSubData({ ...sub, guesses: [] });
+      }
+      setLoadingGuesses(false);
+    }
+
+    fetchGuesses(baseSub);
+  }, [imgId, submissions]);
+
+  useEffect(() => {
+    if (!loading && imgId && scrollRefs.current[imgId]) {
+      scrollRefs.current[imgId]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [loading, imgId]);
+
+  if (!level) {
+    return (
+      <PageLayout title="NOT FOUND" backPath={`/${layerPath}`}>
+        <div className="text-center py-20 text-2xl uppercase opacity-50">
+          Level not found
+        </div>
+      </PageLayout>
+    );
+  }
+
+  const maxItemsPerRow = 3;
+  const gap = 0.5;
+  const pad = 7;
+  const subCalc = (n: number) => (pad + (n - 1) * gap) / n;
+  const itemWidth = `max(calc(${100 / maxItemsPerRow}vw - ${subCalc(
+    maxItemsPerRow
+  )}rem), 20rem)`;
+
+  return (
+    <PageLayout title={level.name.toUpperCase()} backPath={`/${layerPath}`}>
+      <SEO
+        title={`${level.name.toUpperCase()} - Gallery`}
+        description={`View community submissions for ${level.name}`}
+        image={ogImage}
+      />
+      <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col md:flex-row gap-6 items-center ">
+          <img
+            src={level.thumbnail}
+            alt={level.name}
+            className="w-full md:w-80 aspect-video object-cover "
+          />
+          <div className="flex flex-col gap-2">
+            <h2 className="text-4xl font-bold">{level.levelNumber}</h2>
+            <p className="text-xl text-white/70 italic uppercase tracking-tighter">
+              {submissions.length} Approved Submissions
+            </p>
+          </div>
+        </div>
+        <div className="w-full h-0.5 bg-white mb-3"/>
+
+        {loading ? (
+          <div className="text-center py-20 text-2xl animate-pulse uppercase opacity-50">
+            Fetching Data...
+          </div>
+        ) : (
+          <div className="flex gap-2 flex-wrap justify-center">
+            {submissions.map((sub) => (
+              <Link
+                key={sub.id}
+                to={`/${layerPath}/${levelName}/${sub.id}`}
+                ref={(el) => { scrollRefs.current[sub.id] = el; }}
+                style={{ width: itemWidth }}
+                className="relative flex flex-col bg-black/40 p-4 [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)]"
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <SubmitterProfilePicture url={sub.submitter.discord_avatar_url} />
+                    <span className="text-sm font-bold truncate max-w-[120px]">
+                      {sub.submitter.discord_name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-white/40 uppercase">
+                    #{sub.id}
+                  </span>
+                </div>
+
+                <div className="w-full h-0.5 bg-white mb-3" />
+
+                <div className="w-full px-5 mt-auto mb-auto flex justify-center">
+                  <div className="w-full aspect-video bg-zinc-900 overflow-hidden">
+                    <img
+                      src={`https://images.ultrakidle.online/${sub.storage_path}`}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+
+                <div className="w-full h-0.5 bg-white mt-3" />
+
+                <div className="grid grid-cols-3 gap-1 mt-2">
+                  <div className="text-center">
+                    <p className="text-xs text-white uppercase tracking-tighter">
+                      Times Picked
+                    </p>
+                    <p className="text-sm ">{sub.times_picked}</p>
+                  </div>
+                  <div className="text-center border-x-2 border-white">
+                    <p className="text-xs text-white uppercase tracking-tighter">
+                      Avg Score
+                    </p>
+                    <p className="text-sm ">{Math.round(sub.avg_score)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs text-white uppercase tracking-tighter">
+                      Avg Time
+                    </p>
+                    <p className="text-sm ">
+                      {Number(sub.avg_time).toFixed(1)}s
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+      <Modal
+        isOpen={!!imgId}
+        onClose={() => navigate(`/${layerPath}/${levelName}`)}
+        maxWidth="max-w-5xl"
+        showFooterButton={false}
+      >
+        <div className="flex flex-col md:flex-row min-h-0 h-full w-full">
+          <div className="flex-[2] bg-black flex items-center justify-center  md:border-b-0 md:border-r-2 border-white">
+            {submissions.find((s) => s.id.toString() === imgId) && (
+              <img
+                src={`https://images.ultrakidle.online/${
+                  submissions.find((s) => s.id.toString() === imgId)
+                    ?.storage_path
+                }`}
+                className="max-w-full max-h-[70vh] object-contain bg-black"
+              />
+            )}
+          </div>
+
+          <div className="flex-1 p-6 flex flex-col gap-6 overflow-y-auto">
+            {selectedSubData ? (
+              <>
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center gap-3">
+                    <SubmitterProfilePicture
+                      url={selectedSubData.submitter.discord_avatar_url}
+                      className="w-10 h-10 rounded-full border-2 border-white"
+                    />
+                    <div>
+                      <p className="font-bold text-lg text-white">
+                        {selectedSubData.submitter.discord_name}
+                      </p>
+                      <p className="text-xs text-white uppercase">
+                        {new Date(
+                          selectedSubData.created_at
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
+                  <div className="text-center">
+                    <p className="text-sm text-white uppercase md:mb-1">Times Picked</p>
+                    <p className="text-lg md:text-2xl ">{selectedSubData.times_picked}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-white uppercase md:mb-1">Total Guesses</p>
+                    <p className="text-lg md:text-2xl ">
+                      {selectedSubData.guesses?.reduce((acc, g) => acc + Number(g.amount), 0) ||
+                        0}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-white uppercase md:mb-1">Avg Score</p>
+                    <p className="text-lg md:text-2xl ">{Math.round(selectedSubData.avg_score)}</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm text-white uppercase md:mb-1">Avg Time</p>
+                    <p className="text-lg md:text-2xl ">
+                      {Number(selectedSubData.avg_time).toFixed(2)}s
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex-1">
+                  {loadingGuesses ? (
+                    <div className="animate-pulse text-xs uppercase opacity-50">
+                      Loading Stats...
+                    </div>
+                  ) : (
+                    <GraphLevelGuessed
+                      guessesMap={
+                        new Map(
+                          selectedSubData.guesses?.map((g) => [
+                            Number(g.level_id),
+                            Number(g.amount),
+                          ])
+                        )
+                      }
+                      correct_level_id={selectedSubData.level_id}
+                    />
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full animate-pulse uppercase">
+                Loading Stats...
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/Prelude.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function Prelude() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  const preludeLevels = levels
+    .filter((l) => /^0-[0-9]/.test(l.levelNumber))
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const secretLevel = levels.find((l) => l.levelNumber === "0-S");
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  return (
+    <PageLayout title="PRELUDE">
+      <LevelGrid
+        title="Overture: The Mouth of Hell"
+        levels={preludeLevels}
+        maxItemsPerRow={5}
+        layerPath="prelude"
+        counts={counts}
+        secretLevel={secretLevel}
+      />
+    </PageLayout>
+  );
+}
+
+
+
+================================================
+FILE: pages/PrimeSanctums.tsx
+================================================
+import { useEffect, useState } from "react";
+import PageLayout from "@/components/layout/PageLayout";
+import LevelGrid from "@/components/ui/LevelGrid";
+import { supabase } from "@/lib/supabase";
+import { levels } from "@/lib/levels_list.ts";
+
+export default function PrimeSanctums() {
+  const [counts, setCounts] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    async function fetchCounts() {
+      const { data } = await supabase.from("level_submission_counts").select("*");
+
+      if (data) {
+        const map = data.reduce((acc, curr) => {
+          acc[curr.level_id] = curr.approved_count;
+          return acc;
+        }, {} as Record<number, number>);
+        setCounts(map);
+      }
+    }
+
+    fetchCounts();
+  }, []);
+
+  const manifestPrimes = levels
+    .filter((l) => /^P-[0-9]/.test(l.levelNumber))
+    .sort((a, b) => a.orderIndex - b.orderIndex);
+
+  const p3Placeholder = {
+    id: -1,
+    levelNumber: "P-3",
+    name: "???",
+    thumbnail: "/images/locked.webp",
+  };
+
+  const allPrimes = [...manifestPrimes, p3Placeholder];
+
+  return (
+    <PageLayout title="PRIME SANCTUMS">
+      <LevelGrid
+        title="Prime Sanctums"
+        levels={allPrimes}
+        maxItemsPerRow={3}
+        layerPath="prime-sanctums"
+        counts={{ ...counts, [-1]: "???" }}
+        outerPadding={16}
+      />
+    </PageLayout>
+  );
+}
+
+

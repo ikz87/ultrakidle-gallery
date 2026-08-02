@@ -47,7 +47,7 @@ export default function Encores() {
   return (
     <PageLayout title="ENCORES">
       <LevelGrid
-        title="Encore"
+        title="Encores"
         levels={allEncores}
         maxItemsPerRow={5}
         layerPath="encores"

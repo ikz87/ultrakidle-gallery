@@ -8,6 +8,8 @@ import Act3 from "@/pages/Act3";
 import Encores from "@/pages/Encores";
 import PrimeSanctums from "@/pages/PrimeSanctums";
 import LevelGallery from "@/pages/LevelGallery";
+import SubmitterSearch from "@/pages/SubmitterSearch";
+import SubmitterGallery from "@/pages/SubmitterGallery";
 import SEO from "@/components/SEO";
 
 export default function App() {
@@ -37,6 +39,8 @@ export default function App() {
           <Route path="/act-3" element={<Act3 />} />
           <Route path="/encores" element={<Encores />} />
           <Route path="/prime-sanctums" element={<PrimeSanctums />} />
+          <Route path="/submitter-search" element={<SubmitterSearch />} />
+          <Route path="/submitter/:submitterId/:imgId?" element={<SubmitterGallery />} />
           <Route path="/:layerPath/:levelName/:imgId?" element={<LevelGallery />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
