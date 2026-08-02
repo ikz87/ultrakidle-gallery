@@ -14,8 +14,12 @@ export async function onRequest(context) {
   }
 
   return new HTMLRewriter()
+    // Strip out all potential existing image and card tags
     .on('meta[property="og:image"]', { element: (el) => el.remove() })
+    .on('meta[name="og:image"]', { element: (el) => el.remove() })
+    .on('meta[property="twitter:image"]', { element: (el) => el.remove() })
     .on('meta[name="twitter:image"]', { element: (el) => el.remove() })
+    .on('meta[property="twitter:card"]', { element: (el) => el.remove() })
     .on('meta[name="twitter:card"]', { element: (el) => el.remove() })
     .on("head", new ImageInjector(imageUrl))
     .transform(response);
