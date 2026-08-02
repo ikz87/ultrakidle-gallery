@@ -47,7 +47,7 @@ export default function SubmitterSearch() {
 
   return (
     <PageLayout title="SUBMITTER SEARCH" backPath="/">
-      <div className="flex flex-1 flex-col gap-6 w-full max-w-4xl mx-auto md:h-[calc(100vh-175px)] h-[calc(100vh-110px)]">
+      <div className="flex flex-1 flex-col gap-6 w-full max-w-4xl mx-auto md:h-[calc(100dvh-175px)] h-[calc(100dvh-110px)]">
         <input
           type="text"
           placeholder="SEARCH BY DISCORD NAME..."
