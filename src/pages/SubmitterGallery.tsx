@@ -160,11 +160,19 @@ export default function SubmitterGallery() {
             <div className="flex gap-2 flex-wrap justify-center">
               {submissions.map((sub) => {
                 const matchedLevel = levels.find((l) => l.id === sub.level_id);
+                const levelSlug = matchedLevel ? matchedLevel.levelNumber : "unknown";
+
                 return (
                   <div
                     key={sub.id}
-                    ref={(el) => { scrollRefs.current[sub.id] = el; }}
-                    onClick={() => navigate(`/submitter/${submitterId}/${sub.id}`)}
+                    ref={(el) => {
+                      scrollRefs.current[sub.id] = el;
+                    }}
+                    onClick={() =>
+                      navigate(
+                        `/submitter/${submitterId}/${levelSlug}/${sub.id}`
+                      )
+                    }
                     style={{ width: itemWidth }}
                     className="relative flex flex-col bg-black/40 p-4 [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)] cursor-pointer hover:bg-white/[0.02]"
                   >

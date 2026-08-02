@@ -26,15 +26,13 @@ export async function onRequest(context) {
 }
 
 function buildImageUrl(levelSlug, id) {
+  // id is the submission ID, levelSlug is the level number (e.g., "0-1")
   if (!/^\d+$/.test(id)) return null;
 
-  const parts = String(levelSlug).split("-");
-  if (parts.length < 2) return null;
+  // Validate that levelSlug matches the "0-1" format
+  if (!/^\d+-\d+$/i.test(levelSlug)) return null;
 
-  const levelNumber = `${parts[0]}-${parts[1]}`;
-  if (!/^[a-z0-9]+-[a-z0-9]+$/i.test(levelNumber)) return null;
-
-  return `https://images.ultrakidle.online/${levelNumber}/${id}.jpg`;
+  return `https://images.ultrakidle.online/${levelSlug}/${id}.jpg`;
 }
 
 class ImageInjector {

@@ -56,12 +56,10 @@ export default function LevelGrid({
       }rem), 15.5rem))`
     : "100%";
 
-  const sanitizePath = (levelNumber: string, name: string) => {
-    return `${levelNumber}-${name}`
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-");
+  const sanitizePath = (levelNumber: string) => {
+    return levelNumber.toLowerCase();
   };
+
 
   return (
     <div className="w-full">

@@ -29,7 +29,7 @@ interface Submission {
 }
 
 export default function LevelGallery() {
-  const { layerPath, levelName, imgId } = useParams();
+  const { layerPath, levelSlug, imgId } = useParams(); // Ensure destructuring levelSlug
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -43,11 +43,7 @@ export default function LevelGallery() {
     : undefined;
 
   const level = levels.find((l) => {
-    const slug = `${l.levelNumber}-${l.name}`
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-");
-    return slug === levelName;
+    return l.levelNumber.toLowerCase() === levelSlug?.toLowerCase();
   });
 
   useEffect(() => {
@@ -91,7 +87,7 @@ export default function LevelGallery() {
 
     const baseSub = submissions.find((s) => s.id.toString() === imgId);
     if (!baseSub) {
-      navigate(`/${layerPath}/${levelName}`);
+      navigate(`/${layerPath}/${levelSlug}`);
       return;
     }
 
@@ -114,7 +110,7 @@ export default function LevelGallery() {
     }
 
     fetchGuesses(baseSub);
-  }, [imgId, submissions, navigate, layerPath, levelName]);
+  }, [imgId, submissions, navigate, layerPath, levelSlug]);
 
   useEffect(() => {
     if (!loading && imgId && scrollRefs.current[imgId]) {
@@ -176,7 +172,7 @@ export default function LevelGallery() {
               {submissions.map((sub) => (
                 <Link
                   key={sub.id}
-                  to={`/${layerPath}/${levelName}/${sub.id}`}
+                  to={`/${layerPath}/${levelSlug}/${sub.id}`}
                   ref={(el) => { scrollRefs.current[sub.id] = el; }}
                   style={{ width: itemWidth }}
                   className="relative flex flex-col bg-black/40 p-4 [clip-path:polygon(8px_0,calc(100%-8px)_0,100%_8px,100%_calc(100%-8px),calc(100%-8px)_100%,8px_100%,0_calc(100%-8px),0_8px)]"
@@ -237,7 +233,7 @@ export default function LevelGallery() {
       </PageLayout>
     <Modal
       isOpen={!!imgId}
-      onClose={() => navigate(`/${layerPath}/${levelName}`)}
+      onClose={() => navigate(`/${layerPath}/${levelSlug}`)}
       maxWidth="max-w-5xl"
       showFooterButton={false}
     >

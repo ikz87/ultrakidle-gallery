@@ -40,8 +40,8 @@ export default function App() {
           <Route path="/encores" element={<Encores />} />
           <Route path="/prime-sanctums" element={<PrimeSanctums />} />
           <Route path="/submitter-search" element={<SubmitterSearch />} />
-          <Route path="/submitter/:submitterId/:imgId?" element={<SubmitterGallery />} />
-          <Route path="/:layerPath/:levelName/:imgId?" element={<LevelGallery />} />
+          <Route path="/submitter/:submitterId/:levelSlug?/:imgId?" element={<SubmitterGallery />} />
+          <Route path="/:layerPath/:levelSlug/:imgId?" element={<LevelGallery />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
