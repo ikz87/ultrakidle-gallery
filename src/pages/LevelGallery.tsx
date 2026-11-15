@@ -41,8 +41,8 @@ export default function LevelGallery() {
         id,
         storage_path,
         times_picked,
+        total_guesses,
         avg_score,
-        avg_time,
         created_at,
         level_id,
         submitter_id,
@@ -202,17 +202,15 @@ export default function LevelGallery() {
                     </div>
                     <div className="text-center border-x-2 border-white">
                       <p className="text-xs text-white uppercase tracking-tighter">
-                        Avg Score
+                        Total Guesses
                       </p>
-                      <p className="text-sm ">{Math.round(sub.avg_score)}</p>
+                      <p className="text-sm ">{sub.total_guesses}</p>
                     </div>
                     <div className="text-center">
                       <p className="text-xs text-white uppercase tracking-tighter">
-                        Avg Time
+                        Average Score
                       </p>
-                      <p className="text-sm ">
-                        {Number(sub.avg_time).toFixed(1)}s
-                      </p>
+                      <p className="text-sm ">{Math.round(sub.avg_score)}</p>
                     </div>
                   </div>
                 </Link>
@@ -264,7 +262,7 @@ export default function LevelGallery() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
+              <div className="grid grid-cols-3 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
                 <div className="text-center">
                   <p className="text-sm text-white uppercase md:mb-1">Times Picked</p>
                   <p className="text-lg md:text-2xl ">{selectedSubData.times_picked}</p>
@@ -277,14 +275,8 @@ export default function LevelGallery() {
                   </p>
                 </div>
                 <div className="text-center">
-                  <p className="text-sm text-white uppercase md:mb-1">Avg Score</p>
+                  <p className="text-sm text-white uppercase md:mb-1">Average Score</p>
                   <p className="text-lg md:text-2xl ">{Math.round(selectedSubData.avg_score)}</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-white uppercase md:mb-1">Avg Time</p>
-                  <p className="text-lg md:text-2xl ">
-                    {Number(selectedSubData.avg_time).toFixed(2)}s
-                  </p>
                 </div>
               </div>
 

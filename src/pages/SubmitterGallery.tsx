@@ -50,8 +50,8 @@ export default function SubmitterGallery() {
           id,
           storage_path,
           times_picked,
+          total_guesses,
           avg_score,
-          avg_time,
           created_at,
           level_id,
           submitter:submitter_profiles (
@@ -315,7 +315,7 @@ export default function SubmitterGallery() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
+                <div className="grid grid-cols-3 md:gap-4 gap-2 border-y-2 border-white md:py-4 py-2">
                   <div className="text-center">
                     <p className="text-sm text-white uppercase md:mb-1">Times Picked</p>
                     <p className="text-lg md:text-2xl ">{selectedSubData.times_picked}</p>
@@ -328,14 +328,8 @@ export default function SubmitterGallery() {
                     </p>
                   </div>
                   <div className="text-center">
-                    <p className="text-sm text-white uppercase md:mb-1">Avg Score</p>
+                    <p className="text-sm text-white uppercase md:mb-1">Average Score</p>
                     <p className="text-lg md:text-2xl ">{Math.round(selectedSubData.avg_score)}</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm text-white uppercase md:mb-1">Avg Time</p>
-                    <p className="text-lg md:text-2xl ">
-                      {Number(selectedSubData.avg_time).toFixed(2)}s
-                    </p>
                   </div>
                 </div>
 

@@ -1,139 +1,121 @@
--- Discord account linking for the gallery (read-only phase)
+-- Total guesses per image, so the gallery cards can show it without pulling
+-- the whole guess distribution.
 --
--- Identity comes exclusively from the signed Supabase session (Discord OAuth),
--- never from anything the client sends, so nobody can claim another user's
--- submissions by passing a discord_user_id around.
+-- Kept in the same recompute as avg_score (same distribution, same trigger),
+-- and cumulative like the distribution itself: the 2-day purge of
+-- inferno_guesses can't touch it.
 --
--- Required dashboard steps BEFORE this is useful:
---   1. Authentication > Providers > Discord -> enable, paste Client ID + Secret
---      (Discord dev portal > OAuth2 > Redirects must include:
---       https://sbvjehmbkmdlflocjjtu.supabase.co/auth/v1/callback )
---   2. Authentication > URL Configuration > Redirect URLs -> add:
---       https://gallery.ultrakidle.online/me
---       http://localhost:5173/me
---
--- Nothing here touches existing data. It only adds functions + one SELECT policy.
+-- Safe to run whether or not the previous PART 3 stats migration was applied:
+-- the column, function, triggers and backfill are all (re)created here.
 
--- Discord id of the current session, taken from the JWT (signed by Supabase),
--- with a fallback to auth.identities in case provider_id is not in app_metadata.
--- The last fallback covers sessions created by the main app, which signs users
--- in as <discord_id>@discord.internal (same Supabase project, so the gallery can
--- be handed one of those instead of a Discord OAuth session).
-create or replace function public.current_discord_id()
-returns text
-language sql
-stable
+alter table public.image_submissions
+  add column if not exists total_guesses bigint not null default 0;
+
+create or replace function public.fn_recalc_submission_avg_score(p_submission_id bigint)
+returns void
+language plpgsql
 security definer
 set search_path = public
 as $$
-  select coalesce(
-    auth.jwt() -> 'app_metadata' ->> 'provider_id',
-    (
-      select coalesce(i.provider_id, i.identity_data ->> 'sub')
-      from auth.identities i
-      where i.user_id = auth.uid()
-        and i.provider = 'discord'
-      limit 1
-    ),
-    case
-      when (auth.jwt() ->> 'email') ~ '^[0-9]+@discord\.internal$'
-        then split_part(auth.jwt() ->> 'email', '@', 1)
-    end
-  );
+declare
+  v_level_id bigint;
+  v_correct_order int;
+  v_avg numeric(10,2);
+  v_total bigint;
+begin
+  select level_id into v_level_id
+  from public.image_submissions
+  where id = p_submission_id;
+
+  if v_level_id is null then
+    return;
+  end if;
+
+  select coalesce(order_index, 0) into v_correct_order
+  from public.levels
+  where id = v_level_id;
+
+  v_correct_order := coalesce(v_correct_order, 0);
+
+  select round(
+           sum(g.amount * round(100.0 * power(0.85, abs(v_correct_order - coalesce(gl.order_index, 0)))))
+             / nullif(sum(g.amount), 0),
+           2
+         ),
+         coalesce(sum(g.amount), 0)
+  into v_avg, v_total
+  from public.inferno_image_guesses g
+  left join public.levels gl on gl.id = g.id_level
+  where g.id_image_submit = p_submission_id;
+
+  update public.image_submissions
+  set avg_score = coalesce(v_avg, 0),
+      total_guesses = v_total
+  where id = p_submission_id;
+end;
 $$;
 
--- submitter_profiles rows that belong to the current session.
-create or replace function public.my_submitter_ids()
-returns setof bigint
-language sql
-stable
-security definer
-set search_path = public
+-- Guess distribution changed (both game modes end up here).
+create or replace function public.fn_trg_recalc_avg_from_guesses()
+returns trigger
+language plpgsql
 as $$
-  select p.id::bigint
-  from public.submitter_profiles p
-  where public.current_discord_id() is not null
-    and p.discord_user_id::text = public.current_discord_id();
+begin
+  if TG_OP = 'DELETE' then
+    perform public.fn_recalc_submission_avg_score(OLD.id_image_submit);
+    return null;
+  end if;
+
+  if TG_OP = 'UPDATE' and OLD.id_image_submit is distinct from NEW.id_image_submit then
+    perform public.fn_recalc_submission_avg_score(OLD.id_image_submit);
+  end if;
+
+  perform public.fn_recalc_submission_avg_score(NEW.id_image_submit);
+  return null;
+end;
 $$;
 
--- Only logged-in users may call these.
-revoke execute on function public.current_discord_id() from public;
-revoke execute on function public.my_submitter_ids() from public;
-grant execute on function public.current_discord_id() to authenticated;
-grant execute on function public.my_submitter_ids() to authenticated;
+drop trigger if exists trg_recalc_avg_from_guesses on public.inferno_image_guesses;
+create trigger trg_recalc_avg_from_guesses
+after insert or delete or update of amount, id_level, id_image_submit
+on public.inferno_image_guesses
+for each row execute function public.fn_trg_recalc_avg_from_guesses();
 
--- Logged-in submitters can read their own submissions, whatever the status.
--- (The existing policy keeps approved ones public.)
-drop policy if exists "submitter can read own submissions" on public.image_submissions;
-create policy "submitter can read own submissions"
+-- The correct answer changed (admin fixing a submission's level).
+create or replace function public.fn_trg_recalc_avg_from_submission()
+returns trigger
+language plpgsql
+as $$
+begin
+  perform public.fn_recalc_submission_avg_score(NEW.id);
+  return null;
+end;
+$$;
+
+drop trigger if exists trg_recalc_avg_from_submission on public.image_submissions;
+create trigger trg_recalc_avg_from_submission
+after update of level_id
 on public.image_submissions
-for select
-to authenticated
-using (submitter_id in (select public.my_submitter_ids()));
+for each row execute function public.fn_trg_recalc_avg_from_submission();
 
--- Safety net: whatever anonymous visitors can read today, logged-in visitors
--- must keep seeing too (the gallery breaks otherwise). Both policies are
--- permissive, so they only add to the existing ones.
-drop policy if exists "authenticated can read approved submissions" on public.image_submissions;
-create policy "authenticated can read approved submissions"
-on public.image_submissions
-for select
-to authenticated
-using (status = 'approved');
+-- Retire the old purge-driven recompute if it is still around (no-op otherwise).
+drop trigger if exists trg_sync_submission_stats on public.inferno_guesses;
+drop function if exists public.fn_sync_submission_stats();
 
-drop policy if exists "authenticated can read submitter profiles" on public.submitter_profiles;
-create policy "authenticated can read submitter profiles"
-on public.submitter_profiles
-for select
-to authenticated
-using (true);
+-- The hot path filters by image; the only unique key is (id_level, id_image_submit).
+create index if not exists idx_inferno_image_guesses_image
+  on public.inferno_image_guesses (id_image_submit);
 
--- ---------------------------------------------------------------------------
--- PART 2 - delete flow (added 2026-11-15)
---
--- Images live in the Cloudflare R2 bucket "level-images" (key = storage_path),
--- not in Supabase Storage, so the row and the object have to be deleted
--- together by the delete-submission edge function (service role). There is
--- deliberately NO delete policy for `authenticated`: if the browser could
--- delete the row on its own, the R2 object would be left orphaned and still
--- publicly reachable.
---
--- These FK changes are what makes an actual row delete possible at all; today
--- every child constraint is NO ACTION.
--- ---------------------------------------------------------------------------
+-- Backfill both counters from the distribution we still have.
+do $$
+declare
+  r record;
+begin
+  for r in select id from public.image_submissions loop
+    perform public.fn_recalc_submission_avg_score(r.id);
+  end loop;
+end;
+$$;
 
--- Per-image guesses die with the image.
-alter table public.inferno_image_guesses
-  drop constraint if exists inferno_image_guesses_id_image_submit_fkey;
-alter table public.inferno_image_guesses
-  add constraint inferno_image_guesses_id_image_submit_fkey
-  foreign key (id_image_submit)
-  references public.image_submissions (id)
-  on delete cascade;
-
--- IG cybergrind rounds keep their row (and their own public_image_url copy).
-alter table public.ig_cybergrind_rounds
-  drop constraint if exists ig_cybergrind_rounds_image_submission_id_fkey;
-alter table public.ig_cybergrind_rounds
-  add constraint ig_cybergrind_rounds_image_submission_id_fkey
-  foreign key (image_submission_id)
-  references public.image_submissions (id)
-  on delete set null;
-
--- Daily rounds keep their row too, but the image reference is dropped. The
--- set's round structure and scores stay intact; that day's round falls back to
--- its stored public_image_url (which will 404 once the object is gone).
--- The edge function refuses to delete an image that is in the daily that is
--- live right now, so this only ever applies to past dailies.
-alter table public.inferno_daily_rounds
-  alter column image_submission_id drop not null;
-alter table public.inferno_daily_rounds
-  drop constraint if exists inferno_daily_rounds_image_submission_id_fkey;
-alter table public.inferno_daily_rounds
-  add constraint inferno_daily_rounds_image_submission_id_fkey
-  foreign key (image_submission_id)
-  references public.image_submissions (id)
-  on delete set null;
-
--- make the new functions/policies visible to the API immediately
+-- make the new column/functions visible to the API immediately
 notify pgrst, 'reload schema';

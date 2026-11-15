@@ -61,17 +61,15 @@ export default function SubmissionCard({
         </div>
         <div className="text-center border-x-2 border-white">
           <p className="text-xs text-white uppercase tracking-tighter">
-            Avg Score
+            Total Guesses
           </p>
-          <p className="text-sm ">{Math.round(submission.avg_score)}</p>
+          <p className="text-sm ">{submission.total_guesses}</p>
         </div>
         <div className="text-center">
           <p className="text-xs text-white uppercase tracking-tighter">
-            Avg Time
+            Average Score
           </p>
-          <p className="text-sm ">
-            {Number(submission.avg_time).toFixed(1)}s
-          </p>
+          <p className="text-sm ">{Math.round(submission.avg_score)}</p>
         </div>
       </div>
     </div>

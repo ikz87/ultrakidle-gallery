@@ -2,8 +2,8 @@ export interface Submission {
   id: number;
   storage_path: string;
   times_picked: number;
+  total_guesses: number;
   avg_score: number;
-  avg_time: number;
   created_at: string;
   level_id: number;
   status?: string;
