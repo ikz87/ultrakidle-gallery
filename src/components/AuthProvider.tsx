@@ -22,10 +22,16 @@ function getDiscordId(user: User | null): string | null {
   if (fromMetadata) return String(fromMetadata);
 
   const identity = user.identities?.find((i) => i.provider === "discord");
-  if (!identity) return null;
+  if (identity) {
+    const fromIdentity = identity.id ?? identity.identity_data?.sub;
+    if (fromIdentity) return String(fromIdentity);
+  }
 
-  const fromIdentity = identity.id ?? identity.identity_data?.sub;
-  return fromIdentity ? String(fromIdentity) : null;
+  // The main app signs users in as <discord_id>@discord.internal. In dev both
+  // apps share localhost:5173 (and therefore the same stored session), so the
+  // gallery can be handed one of those instead of a Discord OAuth session.
+  const match = /^(\d+)@discord\.internal$/.exec(user.email ?? "");
+  return match ? match[1] : null;
 }
 
 export default function AuthProvider({ children }: { children: ReactNode }) {

@@ -9,13 +9,16 @@
 --      (Discord dev portal > OAuth2 > Redirects must include:
 --       https://sbvjehmbkmdlflocjjtu.supabase.co/auth/v1/callback )
 --   2. Authentication > URL Configuration > Redirect URLs -> add:
---       https://ultrakidle.online/me
+--       https://gallery.ultrakidle.online/me
 --       http://localhost:5173/me
 --
 -- Nothing here touches existing data. It only adds functions + one SELECT policy.
 
 -- Discord id of the current session, taken from the JWT (signed by Supabase),
 -- with a fallback to auth.identities in case provider_id is not in app_metadata.
+-- The last fallback covers sessions created by the main app, which signs users
+-- in as <discord_id>@discord.internal (same Supabase project, so the gallery can
+-- be handed one of those instead of a Discord OAuth session).
 create or replace function public.current_discord_id()
 returns text
 language sql
@@ -31,7 +34,11 @@ as $$
       where i.user_id = auth.uid()
         and i.provider = 'discord'
       limit 1
-    )
+    ),
+    case
+      when (auth.jwt() ->> 'email') ~ '^[0-9]+@discord\.internal$'
+        then split_part(auth.jwt() ->> 'email', '@', 1)
+    end
   );
 $$;
 
