@@ -10,7 +10,7 @@ import { supabase } from "@/lib/supabase";
 import { levels } from "@/lib/levels_list";
 import SEO from "@/components/SEO";
 import SubmitterProfilePicture from "@/components/ui/SubmitterProfilePicture";
-import { useAuth } from "@/lib/auth";
+import { isGalleryAdmin, useAuth } from "@/lib/auth";
 import { deleteSubmission } from "@/lib/submissions";
 import type { Submission } from "@/lib/types";
 
@@ -24,7 +24,7 @@ interface SubmissionCounts {
 export default function SubmitterGallery() {
   const { submitterId, imgId } = useParams();
   const navigate = useNavigate();
-  const { session } = useAuth();
+  const { session, discordId } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubData, setSelectedSubData] = useState<Submission | null>(null);
@@ -38,6 +38,8 @@ export default function SubmitterGallery() {
 
   const isOwner =
     Boolean(session) && ownSubmitterIds.includes(Number(submitterId));
+  const isAdmin = isGalleryAdmin(discordId);
+  const canDelete = isOwner || isAdmin;
 
   const currentSub = submissions.find((s) => s.id.toString() === imgId);
   const ogImage = currentSub 
@@ -392,7 +394,7 @@ export default function SubmitterGallery() {
                   )}
                 </div>
 
-                {isOwner && (
+                {canDelete && (
                   <div className="pt-4 border-t-2 border-white/20">
                     <Button
                       variant="danger"
@@ -432,6 +434,12 @@ export default function SubmitterGallery() {
             Submission #{selectedSubData?.id} will be removed from the gallery
             and its image deleted. This cannot be undone.
           </p>
+
+          {isAdmin && !isOwner && (
+            <p className="text-xs text-white/50 uppercase tracking-tighter">
+              Owned by {selectedSubData?.submitter.discord_name}
+            </p>
+          )}
 
           {deleteError && (
             <p className="text-xs text-[#FF8000] uppercase tracking-tighter">
