@@ -8,26 +8,8 @@ import { supabase } from "@/lib/supabase";
 import { levels } from "@/lib/levels_list";
 import SEO from "@/components/SEO";
 import SubmitterProfilePicture from "@/components/ui/SubmitterProfilePicture";
-
-
-
-interface Submission {
-  id: number;
-  storage_path: string;
-  times_picked: number;
-  avg_score: number;
-  avg_time: number;
-  created_at: string;
-  level_id: number;
-  submitter: {
-    discord_name: string;
-    discord_avatar_url: string;
-  };
-  guesses?: {
-    level_id: number;
-    amount: number;
-  }[];
-}
+import DeleteSubmissionButton from "@/components/ui/DeleteSubmissionButton";
+import type { Submission } from "@/lib/types";
 
 export default function LevelGallery() {
   const { layerPath, levelSlug, imgId } = useParams(); // Ensure destructuring levelSlug
@@ -36,6 +18,7 @@ export default function LevelGallery() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubData, setSelectedSubData] = useState<Submission | null>(null);
   const [loadingGuesses, setLoadingGuesses] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const scrollRefs = useRef<{ [key: string]: HTMLAnchorElement | null }>({});
 
   const currentSub = submissions.find((s) => s.id.toString() === imgId);
@@ -62,6 +45,7 @@ export default function LevelGallery() {
         avg_time,
         created_at,
         level_id,
+        submitter_id,
         submitter:submitter_profiles (
           discord_name,
           discord_avatar_url
@@ -112,6 +96,12 @@ export default function LevelGallery() {
 
     fetchGuesses(baseSub);
   }, [imgId, submissions, navigate, layerPath, levelSlug]);
+
+  const handleDeleted = (deletedId: number) => {
+    setSubmissions((prev) => prev.filter((s) => s.id !== deletedId));
+    setSelectedSubData(null);
+    navigate(`/${layerPath}/${levelSlug}`);
+  };
 
   useEffect(() => {
     if (!loading && imgId && scrollRefs.current[imgId]) {
@@ -236,6 +226,7 @@ export default function LevelGallery() {
       onClose={() => navigate(`/${layerPath}/${levelSlug}`)}
       maxWidth="max-w-5xl"
       showFooterButton={false}
+      allowBackdropClose={!confirmDeleteOpen}
     >
       <div className="flex flex-col md:flex-row min-h-0 h-full w-full">
         <div className="flex-[2] bg-black flex items-center justify-center  md:border-b-0 md:border-r-2 border-white">
@@ -316,6 +307,14 @@ export default function LevelGallery() {
                   />
                 )}
               </div>
+
+              <DeleteSubmissionButton
+                submissionId={selectedSubData.id}
+                submitterId={selectedSubData.submitter_id}
+                submitterName={selectedSubData.submitter.discord_name}
+                onDeleted={handleDeleted}
+                onConfirmOpenChange={setConfirmDeleteOpen}
+              />
             </>
           ) : (
             <div className="flex items-center justify-center h-full animate-pulse uppercase">

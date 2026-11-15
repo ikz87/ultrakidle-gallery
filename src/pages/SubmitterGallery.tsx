@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Modal from "@/components/ui/Modal";
-import Button from "@/components/ui/Button";
 import PageLayout from "@/components/layout/PageLayout";
 import GraphLevelGuessed from "@/components/ui/GraphLevelGuessed";
 import GalleryImage from "@/components/ui/GalleryImage";
@@ -10,8 +9,8 @@ import { supabase } from "@/lib/supabase";
 import { levels } from "@/lib/levels_list";
 import SEO from "@/components/SEO";
 import SubmitterProfilePicture from "@/components/ui/SubmitterProfilePicture";
-import { isGalleryAdmin, useAuth } from "@/lib/auth";
-import { deleteSubmission } from "@/lib/submissions";
+import DeleteSubmissionButton from "@/components/ui/DeleteSubmissionButton";
+import { useAuth } from "@/lib/auth";
 import type { Submission } from "@/lib/types";
 
 interface SubmissionCounts {
@@ -24,22 +23,17 @@ interface SubmissionCounts {
 export default function SubmitterGallery() {
   const { submitterId, imgId } = useParams();
   const navigate = useNavigate();
-  const { session, discordId } = useAuth();
+  const { session, ownSubmitterIds } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [selectedSubData, setSelectedSubData] = useState<Submission | null>(null);
   const [loadingGuesses, setLoadingGuesses] = useState(false);
-  const [ownSubmitterIds, setOwnSubmitterIds] = useState<number[]>([]);
   const [ownCounts, setOwnCounts] = useState<SubmissionCounts | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
   const scrollRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const isOwner =
     Boolean(session) && ownSubmitterIds.includes(Number(submitterId));
-  const isAdmin = isGalleryAdmin(discordId);
-  const canDelete = isOwner || isAdmin;
 
   const currentSub = submissions.find((s) => s.id.toString() === imgId);
   const ogImage = currentSub 
@@ -79,27 +73,16 @@ export default function SubmitterGallery() {
   }, [submitterId]);
 
   useEffect(() => {
-    if (!session) return;
+    if (!session || !isOwner) return;
 
     let cancelled = false;
 
     async function fetchOwnSummary() {
-      const { data, error } = await supabase.rpc("my_submitter_ids");
-      if (cancelled) return;
-
-      const ids = error ? [] : ((data ?? []) as (number | string)[]).map(Number);
-      setOwnSubmitterIds(ids);
-
-      if (!ids.includes(Number(submitterId))) {
-        setOwnCounts(null);
-        return;
-      }
-
       const countFor = (status?: string) => {
         const query = supabase
           .from("image_submissions")
           .select("id", { count: "exact", head: true })
-          .in("submitter_id", ids);
+          .in("submitter_id", ownSubmitterIds);
         return status ? query.eq("status", status) : query;
       };
 
@@ -124,7 +107,7 @@ export default function SubmitterGallery() {
     return () => {
       cancelled = true;
     };
-  }, [session, submitterId]);
+  }, [session, isOwner, ownSubmitterIds]);
 
   useEffect(() => {
     if (!imgId || submissions.length === 0) {
@@ -173,37 +156,19 @@ export default function SubmitterGallery() {
     maxItemsPerRow
   )}rem), 20rem)`;
 
-  const handleDelete = async () => {
-    if (!selectedSubData) return;
-
-    const deletedId = selectedSubData.id;
-    setDeleting(true);
-    setDeleteError(null);
-
-    try {
-      await deleteSubmission(deletedId);
-
-      setSubmissions((prev) => prev.filter((s) => s.id !== deletedId));
-      setOwnCounts((prev) =>
-        prev
-          ? {
-              ...prev,
-              total: Math.max(0, prev.total - 1),
-              approved: Math.max(0, prev.approved - 1),
-            }
-          : prev
-      );
-
-      setConfirmDeleteOpen(false);
-      setSelectedSubData(null);
-      navigate(`/submitter/${submitterId}`);
-    } catch (err) {
-      setDeleteError(
-        err instanceof Error ? err.message : "Could not delete submission"
-      );
-    } finally {
-      setDeleting(false);
-    }
+  const handleDeleted = (deletedId: number) => {
+    setSubmissions((prev) => prev.filter((s) => s.id !== deletedId));
+    setOwnCounts((prev) =>
+      prev
+        ? {
+            ...prev,
+            total: Math.max(0, prev.total - 1),
+            approved: Math.max(0, prev.approved - 1),
+          }
+        : prev
+    );
+    setSelectedSubData(null);
+    navigate(`/submitter/${submitterId}`);
   };
 
   return (
@@ -394,21 +359,13 @@ export default function SubmitterGallery() {
                   )}
                 </div>
 
-                {canDelete && (
-                  <div className="pt-4 border-t-2 border-white/20">
-                    <Button
-                      variant="danger"
-                      size="md"
-                      className="w-full"
-                      onClick={() => {
-                        setDeleteError(null);
-                        setConfirmDeleteOpen(true);
-                      }}
-                    >
-                      DELETE SUBMISSION
-                    </Button>
-                  </div>
-                )}
+                <DeleteSubmissionButton
+                  submissionId={selectedSubData.id}
+                  submitterId={selectedSubData.submitter_id}
+                  submitterName={selectedSubData.submitter.discord_name}
+                  onDeleted={handleDeleted}
+                  onConfirmOpenChange={setConfirmDeleteOpen}
+                />
               </>
             ) : (
               <div className="flex items-center justify-center h-full animate-pulse uppercase">
@@ -419,58 +376,6 @@ export default function SubmitterGallery() {
         </div>
       </Modal>
 
-      <Modal
-        isOpen={confirmDeleteOpen}
-        onClose={() => {
-          if (!deleting) setConfirmDeleteOpen(false);
-        }}
-        title="DELETE SUBMISSION"
-        maxWidth="max-w-md"
-        showFooterButton={false}
-        allowBackdropClose={!deleting}
-      >
-        <div className="flex flex-col gap-4">
-          <p className="text-sm md:text-base uppercase tracking-tighter text-white/80">
-            Submission #{selectedSubData?.id} will be removed from the gallery
-            and its image deleted. This cannot be undone.
-          </p>
-
-          {isAdmin && !isOwner && (
-            <p className="text-xs text-white/50 uppercase tracking-tighter">
-              Owned by {selectedSubData?.submitter.discord_name}
-            </p>
-          )}
-
-          {deleteError && (
-            <p className="text-xs text-[#FF8000] uppercase tracking-tighter">
-              {deleteError}
-            </p>
-          )}
-
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="danger"
-              size="md"
-              className="w-full"
-              disabled={deleting}
-              onClick={() => {
-                void handleDelete();
-              }}
-            >
-              {deleting ? "DELETING..." : "DELETE"}
-            </Button>
-            <Button
-              variant="outline"
-              size="md"
-              className="w-full"
-              disabled={deleting}
-              onClick={() => setConfirmDeleteOpen(false)}
-            >
-              CANCEL
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

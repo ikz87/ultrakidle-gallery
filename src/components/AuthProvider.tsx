@@ -32,6 +32,7 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<AuthContextValue["session"]>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(readUrlAuthError);
+  const [ownSubmitterIds, setOwnSubmitterIds] = useState<number[]>([]);
 
   useEffect(() => {
     let active = true;
@@ -57,6 +58,29 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  // Which submitter profiles belong to the logged-in Discord account. Loaded
+  // once per session; also the permission check for deleting a submission.
+  useEffect(() => {
+    if (!session) return;
+
+    let cancelled = false;
+
+    async function loadSubmitterIds() {
+      const { data, error } = await supabase.rpc("my_submitter_ids");
+      if (cancelled) return;
+
+      setOwnSubmitterIds(
+        error ? [] : ((data ?? []) as (number | string)[]).map(Number)
+      );
+    }
+
+    loadSubmitterIds();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
 
   const signInWithDiscord = useCallback(async () => {
     setAuthError(null);
@@ -84,12 +108,13 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       discordId: getDiscordId(session?.user ?? null),
+      ownSubmitterIds,
       loading,
       authError,
       signInWithDiscord,
       signOut,
     }),
-    [session, loading, authError, signInWithDiscord, signOut]
+    [session, ownSubmitterIds, loading, authError, signInWithDiscord, signOut]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -5,6 +5,8 @@ export interface AuthContextValue {
   session: Session | null;
   user: User | null;
   discordId: string | null;
+  /** submitter_profiles ids owned by the logged-in Discord account */
+  ownSubmitterIds: number[];
   loading: boolean;
   authError: string | null;
   signInWithDiscord: () => Promise<void>;
