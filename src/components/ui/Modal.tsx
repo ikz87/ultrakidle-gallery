@@ -75,7 +75,7 @@ const Modal = ({
                   {showCloseButton && (
                     <button
                       onClick={onClose}
-                      className="text-white/50 hover:text-white transition-colors cursor-pointer uppercase text-sm font-bold"
+                      className="ml-auto text-white/50 hover:text-white transition-colors cursor-pointer uppercase text-sm font-bold"
                     >
                       [CLOSE]
                     </button>

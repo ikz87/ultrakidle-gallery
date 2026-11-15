@@ -10,6 +10,7 @@ import PrimeSanctums from "@/pages/PrimeSanctums";
 import LevelGallery from "@/pages/LevelGallery";
 import SubmitterSearch from "@/pages/SubmitterSearch";
 import SubmitterGallery from "@/pages/SubmitterGallery";
+import Me from "@/pages/Me";
 import SEO from "@/components/SEO";
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/encores" element={<Encores />} />
           <Route path="/prime-sanctums" element={<PrimeSanctums />} />
           <Route path="/submitter-search" element={<SubmitterSearch />} />
+          <Route path="/me" element={<Me />} />
           <Route path="/submitter/:submitterId/:levelSlug?/:imgId?" element={<SubmitterGallery />} />
           <Route path="/:layerPath/:levelSlug/:imgId?" element={<LevelGallery />} />
           <Route path="*" element={<Navigate to="/" replace />} />

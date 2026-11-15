@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import Modal from "@/components/ui/Modal";
 import PageLayout from "@/components/layout/PageLayout";
 import GraphLevelGuessed from "@/components/ui/GraphLevelGuessed";
+import GalleryImage from "@/components/ui/GalleryImage";
 import { supabase } from "@/lib/supabase";
 import { levels } from "@/lib/levels_list";
 import SEO from "@/components/SEO";
@@ -193,10 +194,9 @@ export default function LevelGallery() {
 
                   <div className="w-full px-5 mt-auto mb-auto flex justify-center">
                     <div className="w-full aspect-video bg-zinc-900 overflow-hidden">
-                      <img
+                      <GalleryImage
                         src={`https://images.ultrakidle.online/${sub.storage_path}`}
                         className="w-full h-full object-contain"
-                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -240,12 +240,13 @@ export default function LevelGallery() {
       <div className="flex flex-col md:flex-row min-h-0 h-full w-full">
         <div className="flex-[2] bg-black flex items-center justify-center  md:border-b-0 md:border-r-2 border-white">
           {submissions.find((s) => s.id.toString() === imgId) && (
-            <img
+            <GalleryImage
               src={`https://images.ultrakidle.online/${
                 submissions.find((s) => s.id.toString() === imgId)
                   ?.storage_path
               }`}
               className="max-w-full max-h-[70vh] object-contain bg-black"
+              eager
             />
           )}
         </div>
