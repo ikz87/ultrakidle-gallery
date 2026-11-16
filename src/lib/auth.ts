@@ -18,7 +18,12 @@ export const AuthContext = createContext<AuthContextValue | null>(null);
 // Discord accounts that can manage other people's submissions. Mirrors the
 // ADMIN_DISCORD_IDS set in the delete-submission edge function, which is the
 // only thing that actually enforces it.
-export const ADMIN_DISCORD_IDS = ["218938202386333697"];
+//
+// Empty on dev on purpose: `npm run dev` always behaves like a regular account,
+// so the owner-only path can be tested. Production builds keep the override.
+export const ADMIN_DISCORD_IDS: string[] = import.meta.env.DEV
+  ? []
+  : ["218938202386333697"];
 
 export function isGalleryAdmin(discordId: string | null): boolean {
   return Boolean(discordId) && ADMIN_DISCORD_IDS.includes(discordId!);
