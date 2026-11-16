@@ -54,6 +54,7 @@ export default function SubmitterGallery() {
           avg_score,
           created_at,
           level_id,
+          submitter_id,
           submitter:submitter_profiles (
             discord_name,
             discord_avatar_url
